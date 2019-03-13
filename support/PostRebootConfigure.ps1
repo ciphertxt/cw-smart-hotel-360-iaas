@@ -106,20 +106,38 @@ New-NetFirewallRule -DisplayName "Microsoft SQL Server Inbound" -Direction Inbou
 Set-VMHost -EnableEnhancedSessionMode $true
 
 # Set VM Name, Switch Name, and Installation Media Path.
-$VMNames = "SmartHotelWeb1","SmartHotelWeb2","SmartHotelSQL1"
+$vmNameAD1 = "SmartHotelAD1"
+$vmNameWeb1 = "SmartHotelWeb1"
+$vmNameWeb2 = "SmartHotelWeb2"
+$vmNameSQL1 = "SmartHotelSQL1"
 $opsDir = "F:\VirtualMachines"
 
-New-VM -Name "SmartHotelWeb1" -MemoryStartupBytes 4GB -BootDevice VHD -VHDPath "$opsdir\SmartHotelWeb1\SmartHotelWeb1.vhdx" -Path "$opsdir\SmartHotelWeb1" -Generation 2 -Switch $switchName
-New-VM -Name "SmartHotelWeb2" -MemoryStartupBytes 4GB -BootDevice VHD -VHDPath "$opsdir\SmartHotelWeb2\SmartHotelWeb2.vhdx" -Path "$opsdir\SmartHotelWeb2" -Generation 2 -Switch $switchName 
-New-VM -Name "SmartHotelSQL1" -MemoryStartupBytes 4GB -BootDevice VHD -VHDPath "$opsdir\SmartHotelSQL1\SmartHotelSQL1.vhdx" -Path "$opsdir\SmartHotelSQL1" -Generation 2 -Switch $switchName  
+New-VM -Name $vmNameAD1 -MemoryStartupBytes 2GB -BootDevice VHD -VHDPath "$opsdir\$vmNameAD1\$vmNameAD1.vhdx" -Path "$opsdir\$vmNameAD1" -Generation 2 -Switch $switchName
+New-VM -Name $vmNameWeb1 -MemoryStartupBytes 4GB -BootDevice VHD -VHDPath "$opsdir\$vmNameWeb1\$vmNameWeb1.vhdx" -Path "$opsdir\$vmNameWeb1" -Generation 2 -Switch $switchName
+New-VM -Name $vmNameWeb2 -MemoryStartupBytes 4GB -BootDevice VHD -VHDPath "$opsdir\$vmNameWeb2\$vmNameWeb2.vhdx" -Path "$opsdir\$vmNameWeb2" -Generation 2 -Switch $switchName 
+New-VM -Name $vmNameSQL1 -MemoryStartupBytes 4GB -BootDevice VHD -VHDPath "$opsdir\$vmNameSQL1\$vmNameSQL1.vhdx" -Path "$opsdir\$vmNameSQL1" -Generation 2 -Switch $switchName  
 
-$vmweb1 = Get-VMNetworkAdapter -VMName "SmartHotelWeb1"
-$vmweb2 = Get-VMNetworkAdapter -VMName "SmartHotelWeb2"
-$vmsql1 = Get-VMNetworkAdapter -VMName "SmartHotelSQL1"
-
-$vmweb1 | Set-VMNetworkConfiguration -IPAddress "192.168.0.4" -Subnet "255.255.255.0" -DefaultGateway "192.168.0.1" -DNSServer "8.8.8.8"
-$vmweb2 | Set-VMNetworkConfiguration -IPAddress "192.168.0.5" -Subnet "255.255.255.0" -DefaultGateway "192.168.0.1" -DNSServer "8.8.8.8"
-$vmsql1 | Set-VMNetworkConfiguration -IPAddress "192.168.0.6" -Subnet "255.255.255.0" -DefaultGateway "192.168.0.1" -DNSServer "8.8.8.8"
+Get-VMNetworkAdapter -VMName $vmNameAD1 | Set-VMNetworkConfiguration -IPAddress "192.168.0.7" -Subnet "255.255.255.0" -DefaultGateway "192.168.0.1" -DNSServer "192.168.0.7"
+Get-VMNetworkAdapter -VMName $vmNameWeb1 | Set-VMNetworkConfiguration -IPAddress "192.168.0.4" -Subnet "255.255.255.0" -DefaultGateway "192.168.0.1" -DNSServer "192.168.0.7"
+Get-VMNetworkAdapter -VMName $vmNameWeb2 | Set-VMNetworkConfiguration -IPAddress "192.168.0.5" -Subnet "255.255.255.0" -DefaultGateway "192.168.0.1" -DNSServer "192.168.0.7"
+Get-VMNetworkAdapter -VMName $vmNameSQL1 | Set-VMNetworkConfiguration -IPAddress "192.168.0.6" -Subnet "255.255.255.0" -DefaultGateway "192.168.0.1" -DNSServer "192.168.0.7"
 
 # Start all the VMs
-Get-VM | where {$_.State -eq 'Off'} | Start-VM
+Get-VM | ? {$_.State -eq 'Off'} | Start-VM
+
+# Give the VMs time to come up with a 30 sec wait
+Start-Sleep -s 30
+
+# Domain join the VMs and rearm the eval
+$localusername = "Administrator"
+$password = ConvertTo-SecureString "demo@pass123" -AsPlainText -Force
+$localcredential = New-Object System.Management.Automation.PSCredential ($localusername, $password)
+$domainusername = "SH360\Administrator"
+$domaincredential = New-Object System.Management.Automation.PSCredential ($domainusername, $password)
+
+for ($i = 4; $i -le 7; $i++) {
+    Invoke-Command -ComputerName "192.168.0.$i" -ScriptBlock { 
+        slmgr.vbs /rearm
+        Add-Computer –domainname "sh360.local" -Credential $domaincredential -restart –force 
+    } -Credential $localcredential
+}

@@ -45,6 +45,9 @@
         "smarthotelhostNSGname": "smarthotelhostnsg",
         "rdpRulename": "RDP",
         "webRulename": "HTTP",
+        "smarthotelhostTMName": "smarthoteltm",
+        "uniquePublicIPName": "[concat('smarthotelweb', '-', uniqueString(resourceGroup().id))]",
+        "uniqueTMName": "[concat(variables('smarthotelhostTMName'), '-', uniqueString(resourceGroup().id))]",
         "customScriptFolder": "./",
         "customScriptUriScriptFileName": "BootStrapSmartHotelHost.ps1",
         "customScriptUri": "https://raw.githubusercontent.com/ciphertxt/cw-smart-hotel-360-iaas/master/scripts/BootStrapSmartHotelHost.ps1",
@@ -204,7 +207,10 @@
                 "publicIPAddressVersion": "IPv4",
                 "publicIPAllocationMethod": "Dynamic",
                 "idleTimeoutInMinutes": 4,
-                "ipTags": []
+                "ipTags": [],
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('uniquePublicIPName')]"
+                }
             },
             "dependsOn": []
         },
@@ -275,6 +281,40 @@
             "dependsOn": [
                 "[resourceId('Microsoft.Network/networkSecurityGroups', variables('smarthotelhostNSGname'))]"
             ]
+        },
+        {
+            "apiVersion": "2015-11-01",
+            "type": "Microsoft.Network/trafficManagerProfiles",
+            "name": "[variables('smarthotelhostTMName')]",
+            "location": "global",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+            ],
+            "properties": {
+              "profileStatus": "Enabled",
+              "trafficRoutingMethod": "Priority",
+              "dnsConfig": {
+                "relativeName": "[variables('uniqueTMName')]",
+                "ttl": 60
+              },
+              "monitorConfig": {
+                "protocol": "HTTP",
+                "port": 80,
+                "path": "/"
+              },
+              "endpoints": [
+                {
+                  "name": "smarthotel360local",
+                  "type": "Microsoft.Network/trafficManagerProfiles/azureEndpoints",
+                  "properties": {
+                    "targetResourceId": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('publicIPAddressName'), 0))]",
+                    "endpointStatus": "Enabled",
+                    "weight": 1,
+                    "priority": 1
+                  }
+                }
+              ]
+            }
         }
     ]
 }

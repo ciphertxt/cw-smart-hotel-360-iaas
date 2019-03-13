@@ -38,6 +38,9 @@ Invoke-WebRequest "http://dl.google.com/chrome/install/375.126/chrome_installer.
 Start-Process -FilePath $Path\$Installer -Args "/silent /install" -Verb RunAs -Wait
 Remove-Item $Path\$Installer
 
+# Enable trusted remoting
+Set-Item wsman:\localhost\client\trustedhosts *
+
 # Download resources
 $opsDir = "C:\OpsgilityTraining"
 
@@ -81,47 +84,60 @@ Format-Volume -DriveLetter F -FileSystem NTFS -NewFileSystemLabel DATA
 $RunOnceKey = "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunOnce"
 set-itemproperty $RunOnceKey "NextRun" ('C:\Windows\System32\WindowsPowerShell\v1.0\Powershell.exe -executionPolicy Unrestricted -File ' + "C:\OpsgilityTraining\PostRebootConfigure.ps1")
 
+# Set default download URIs for VHDs
+$urlsmarthotelad1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelAD1.zip"
+$urlsmarthotelweb1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelWeb1.zip"
+$urlsmarthotelweb2 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelWeb2.zip"
+$urlsmarthotelSQL1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelSQL1.zip"
+
 switch($region)
 {
 
     "WestUS"
     {
+        $urlsmarthotelad1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelAD1.zip"
         $urlsmarthotelweb1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelWeb1.zip"
         $urlsmarthotelweb2 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelWeb2.zip"
         $urlsmarthotelSQL1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelSQL1.zip"
     }
     "EastUS"
     {
+        $urlsmarthotelad1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelAD1.zip"
         $urlsmarthotelweb1 = "https://opslabseastus.blob.core.windows.net/public/SmartHotelWeb1.zip"
         $urlsmarthotelweb2 = "https://opslabseastus.blob.core.windows.net/public/SmartHotelWeb2.zip"
         $urlsmarthotelSQL1 = "https://opslabseastus.blob.core.windows.net/public/SmartHotelSQL1.zip"
     }
     "SouthCentralUS"
     {
+        $urlsmarthotelad1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelAD1.zip"
         $urlsmarthotelweb1 = "https://opslabssouthcentral.blob.core.windows.net/public/SmartHotelWeb1.zip"
         $urlsmarthotelweb2 = "https://opslabssouthcentral.blob.core.windows.net/public/SmartHotelWeb2.zip"
         $urlsmarthotelSQL1 = "https://opslabssouthcentral.blob.core.windows.net/public/SmartHotelSQL1.zip"
     }
     "NorthEurope"
     {
+        $urlsmarthotelad1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelAD1.zip"
         $urlsmarthotelweb1 = "https://opslabsnortheurope.blob.core.windows.net/public/SmartHotelWeb1.zip"
         $urlsmarthotelweb2 = "https://opslabsnortheurope.blob.core.windows.net/public/SmartHotelWeb2.zip"
         $urlsmarthotelSQL1 = "https://opslabsnortheurope.blob.core.windows.net/public/SmartHotelSQL1.zip"
     }
     "WestEurope"
     {
+        $urlsmarthotelad1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelAD1.zip"
         $urlsmarthotelweb1 = "https://opslabsnortheurope.blob.core.windows.net/public/SmartHotelWeb1.zip"
         $urlsmarthotelweb2 = "https://opslabsnortheurope.blob.core.windows.net/public/SmartHotelWeb2.zip"
         $urlsmarthotelSQL1 = "https://opslabsnortheurope.blob.core.windows.net/public/SmartHotelSQL1.zip"
     }
     "AustraliaEast"
     {
+        $urlsmarthotelad1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelAD1.zip"
         $urlsmarthotelweb1 = "https://opslabsaustraliaeast.blob.core.windows.net/public/SmartHotelWeb1.zip"
         $urlsmarthotelweb2 = "https://opslabsaustraliaeast.blob.core.windows.net/public/SmartHotelWeb2.zip"
         $urlsmarthotelSQL1 = "https://opslabsaustraliaeast.blob.core.windows.net/public/SmartHotelSQL1.zip"
     }
     "EastAsia"
     {
+        $urlsmarthotelad1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelAD1.zip"
         $urlsmarthotelweb1 = "https://opslabseastasia.blob.core.windows.net/public/SmartHotelWeb1.zip"
         $urlsmarthotelweb2 = "https://opslabseastasia.blob.core.windows.net/public/SmartHotelWeb2.zip"
         $urlsmarthotelSQL1 = "https://opslabseastasia.blob.core.windows.net/public/SmartHotelSQL1.zip"
@@ -132,6 +148,7 @@ if ((Test-Path "D:\Temp") -eq $false) {
     New-Item -Path "D:\Temp" -ItemType directory
 }
 
+$job0 = Start-BitsTransfer -Source $urlsmarthotelad1 -Destination "D:\SmartHotelAD1.zip" -Asynchronous
 $job1 = Start-BitsTransfer -Source $urlsmarthotelweb1 -Destination "D:\SmartHotelWeb1.zip" -Asynchronous
 $job2 = Start-BitsTransfer -Source $urlsmarthotelweb2 -Destination "D:\SmartHotelWeb2.zip" -Asynchronous
 $job3 = Start-BitsTransfer -Source $urlsmarthotelSQL1 -Destination "D:\SmartHotelSQL1.zip" -Asynchronous
@@ -153,6 +170,7 @@ while($true) {
     $jobs = Get-BitsTransfer
 }
 
+Complete-BitsTransfer -BitsJob $job0
 Complete-BitsTransfer -BitsJob $job1
 Complete-BitsTransfer -BitsJob $job2
 Complete-BitsTransfer -BitsJob $job3
@@ -172,5 +190,6 @@ Add-Type -assembly "system.io.compression.filesystem"
 (new-object -com shell.application).namespace("F:\VirtualMachines").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelWeb1.zip").Items(),16)
 (new-object -com shell.application).namespace("F:\VirtualMachines").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelWeb2.zip").Items(),16)
 (new-object -com shell.application).namespace("F:\VirtualMachines").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelSQL1.zip").Items(),16)
+(new-object -com shell.application).namespace("F:\VirtualMachines").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelAD1.zip").Items(),16)
 
 Install-WindowsFeature -Name Hyper-V -IncludeManagementTools -Restart
