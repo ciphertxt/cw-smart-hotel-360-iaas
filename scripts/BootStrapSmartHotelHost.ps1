@@ -41,14 +41,12 @@ Remove-Item $Path\$Installer
 # Download resources
 $opsDir = "C:\OpsgilityTraining"
 
-if ((Test-Path $opsDir) -eq $false)
-{
+if ((Test-Path $opsDir) -eq $false) {
     New-Item -Path $opsDir -ItemType directory
     New-Item -Path "$opsDir\Download" -ItemType directory
 }
 
-if ((Test-Path "$opsDir\Download") -eq $false)
-{
+if ((Test-Path "$opsDir\Download") -eq $false) {
     New-Item -Path "$opsDir\Download" -ItemType directory
 }
 
@@ -130,9 +128,7 @@ switch($region)
     }
 }
 
-
-if ((Test-Path "D:\Temp") -eq $false)
-{
+if ((Test-Path "D:\Temp") -eq $false) {
     New-Item -Path "D:\Temp" -ItemType directory
 }
 
@@ -151,19 +147,15 @@ while($true) {
         }
     }
 
-    if($complete -eq $true)
-    {
+    if($complete -eq $true) {
       break
     }
     $jobs = Get-BitsTransfer
-
 }
 
 Complete-BitsTransfer -BitsJob $job1
 Complete-BitsTransfer -BitsJob $job2
 Complete-BitsTransfer -BitsJob $job
-
-
 
 if ((Test-Path "F:\VirtualMachines") -eq $false)
 {
@@ -177,10 +169,8 @@ Add-Type -assembly "system.io.compression.filesystem"
 
 [io.compression.zipfile]::ExtractToDirectory($BackUpPath, $destination)
 
-
 (new-object -com shell.application).namespace("F:\VirtualMachines").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelWeb1.zip").Items(),16)
 (new-object -com shell.application).namespace("F:\VirtualMachines").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelWeb2.zip").Items(),16)
 (new-object -com shell.application).namespace("F:\VirtualMachines").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelSQL1.zip").Items(),16)
-
 
 Install-WindowsFeature -Name Hyper-V -IncludeManagementTools -Restart
