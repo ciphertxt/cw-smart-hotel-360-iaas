@@ -157,9 +157,12 @@ $localcredential = New-Object System.Management.Automation.PSCredential ($localu
 $domainusername = "SH360\Administrator"
 $domaincredential = New-Object System.Management.Automation.PSCredential ($domainusername, $password)
 
-for ($i = 4; $i -lt 7; $i++) {
+for ($i = 4; $i -le 7; $i++) {
     Invoke-Command -ComputerName "192.168.0.$i" -ScriptBlock { 
-        #slmgr.vbs /rearm;
-        Add-Computer –domainname "sh360.local" -Credential $Using:domaincredential -restart –force 
+        slmgr.vbs /rearm
+        if ($Using:i -lt 7) {
+            net accounts /maxpwage:unlimited
+            Add-Computer –DomainName "sh360.local" -Credential $Using:domaincredential -Restart –Force 
+        }
     } -Credential $localcredential
 }
