@@ -46,7 +46,7 @@
         "rdpRulename": "RDP",
         "customScriptFolder": "./",
         "customScriptUriScriptFileName": "BootStrapSmartHotelHost.ps1",
-        "customScriptUri": "https://raw.githubusercontent.com/opsgility/lab-support-public/master/migrating-on-premises-to-azure/BootStrapSmartHotelHost.ps1",
+        "customScriptUri": "https://raw.githubusercontent.com/ciphertxt/cw-smart-hotel-360-iaas/master/scripts/BootStrapSmartHotelHost.ps1",
         "region": "[resourceGroup().location]"
     },
     "resources": [
