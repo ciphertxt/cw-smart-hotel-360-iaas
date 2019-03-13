@@ -1,6 +1,8 @@
 param($sourceFileUrl="", $destinationFolder="", $region="")
 $ErrorActionPreference = 'SilentlyContinue'
 
+Import-Module BitsTransfer
+
 if([string]::IsNullOrEmpty($sourceFileUrl) -eq $false -and [string]::IsNullOrEmpty($destinationFolder) -eq $false)
 {
     if((Test-Path $destinationFolder) -eq $false)
@@ -34,7 +36,7 @@ Set-ItemProperty -Path $HKCU -Name "CheckedUnattendLaunchSetting" -Value 0 -Type
 # Install Chrome
 $Path = $env:TEMP; 
 $Installer = "chrome_installer.exe"
-Invoke-WebRequest "http://dl.google.com/chrome/install/375.126/chrome_installer.exe" -OutFile $Path\$Installer
+Start-BitsTransfer -Source "http://dl.google.com/chrome/install/375.126/chrome_installer.exe" -Destination "$Path\$Installer"
 Start-Process -FilePath $Path\$Installer -Args "/silent /install" -Verb RunAs -Wait
 Remove-Item $Path\$Installer
 
@@ -68,7 +70,6 @@ $urlDMA = "https://download.microsoft.com/download/C/6/3/C63D8695-CEF2-43C3-AF0A
 $outputSSMS = "$opsDir\Download\SSMS-Setup-ENU.exe"
 $outputDMA = "$opsDir\Download\DataMigrationAssistant.msi"
 
-Import-Module BitsTransfer
 #Start-BitsTransfer -Source $urlWindows2016 -Destination $outputWindows2016
 #Start-BitsTransfer -Source $urlWindows2012R2 -Destination $outputWindows2012R2
 #Start-BitsTransfer -Source $urlSQL -Destination $outputSQL
@@ -142,10 +143,6 @@ switch($region)
         $urlsmarthotelweb2 = "https://opslabseastasia.blob.core.windows.net/public/SmartHotelWeb2.zip"
         $urlsmarthotelSQL1 = "https://opslabseastasia.blob.core.windows.net/public/SmartHotelSQL1.zip"
     }
-}
-
-if ((Test-Path "D:\Temp") -eq $false) {
-    New-Item -Path "D:\Temp" -ItemType directory
 }
 
 $job0 = Start-BitsTransfer -Source $urlsmarthotelad1 -Destination "D:\SmartHotelAD1.zip" -Asynchronous
