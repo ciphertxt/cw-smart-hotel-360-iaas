@@ -180,16 +180,13 @@ if ((Test-Path "F:\VirtualMachines") -eq $false)
     New-Item -Path "F:\VirtualMachines" -ItemType directory
 }
 
-$BackUpPath = "D:\SmartHotelWeb1.zip"
 $Destination = "F:\VirtualMachines\"
 
 Add-Type -assembly "system.io.compression.filesystem"
 
-[io.compression.zipfile]::ExtractToDirectory($BackUpPath, $destination)
-
-(new-object -com shell.application).namespace("F:\VirtualMachines").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelWeb1.zip").Items(),16)
-(new-object -com shell.application).namespace("F:\VirtualMachines").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelWeb2.zip").Items(),16)
-(new-object -com shell.application).namespace("F:\VirtualMachines").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelSQL1.zip").Items(),16)
-(new-object -com shell.application).namespace("F:\VirtualMachines").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelAD1.zip").Items(),16)
+(new-object -com shell.application).namespace("$Destination").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelWeb1.zip").Items(),16)
+(new-object -com shell.application).namespace("$Destination").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelWeb2.zip").Items(),16)
+(new-object -com shell.application).namespace("$Destination").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelSQL1.zip").Items(),16)
+(new-object -com shell.application).namespace("$Destination").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelAD1.zip").Items(),16)
 
 Install-WindowsFeature -Name Hyper-V -IncludeManagementTools -Restart
