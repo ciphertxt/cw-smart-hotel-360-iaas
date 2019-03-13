@@ -18,7 +18,7 @@
             }
         },
         "smarthotelhostVMname": {
-            "defaultValue": "SmartHotelHost",
+            "defaultValue": "smarthotelhost",
             "type": "string",
             "metadata": {
                 "description": "Name of the SmartHotel Host machine"
@@ -35,8 +35,8 @@
     },
     "variables": {
         "smarthotelhostNICname": "smarthotelhostnic",
-        "smarthotelhostOSdisk": "[concat(parameters('smarthotelhostVMname'),'_OsDisk')]",
-        "smarthotelhostDATAdisk": "[concat(parameters('smarthotelhostVMname'),'_DataDisk')]",
+        "smarthotelhostOSdisk": "[concat(parameters('smarthotelhostVMname'),'_osdisk')]",
+        "smarthotelhostDATAdisk": "[concat(parameters('smarthotelhostVMname'),'_datadisk')]",
         "publicIPAddressName": "smarthotelhostip",
         "smarthotelVNETname": "smarthotelvnet",
         "addressPrefix": "10.0.0.0/16",

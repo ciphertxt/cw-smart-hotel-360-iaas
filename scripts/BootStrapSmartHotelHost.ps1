@@ -11,7 +11,7 @@ if([string]::IsNullOrEmpty($sourceFileUrl) -eq $false -and [string]::IsNullOrEmp
     $fileName = $splitpath[$splitpath.Length-1]
     $destinationPath = Join-Path $destinationFolder $fileName
 
-    (New-Object Net.WebClient).DownloadFile($sourceFileUrl,$destinationPath);
+    Start-BitsTransfer -Source $sourceFileUrl -Destination $destinationPath
 
     (new-object -com shell.application).namespace($destinationFolder).CopyHere((new-object -com shell.application).namespace($destinationPath).Items(),16)
 }
@@ -155,7 +155,7 @@ while($true) {
 
 Complete-BitsTransfer -BitsJob $job1
 Complete-BitsTransfer -BitsJob $job2
-Complete-BitsTransfer -BitsJob $job
+Complete-BitsTransfer -BitsJob $job3
 
 if ((Test-Path "F:\VirtualMachines") -eq $false)
 {
