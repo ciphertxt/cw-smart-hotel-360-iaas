@@ -117,7 +117,7 @@
             ],
             "resources": [
                 {
-                  "name": "CustomSciptExtension2",
+                  "name": "BootStrapSmartHotel",
                   "type": "extensions",
                   "location": "[resourceGroup().location]",
                   "apiVersion": "2016-03-30",
