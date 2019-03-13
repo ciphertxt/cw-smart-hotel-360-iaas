@@ -1,12 +1,11 @@
-param($sourceFileUrl="", $destinationFolder="", $region="")
+param($postBootScriptUrl = "", $sourceFileUrl="", $destinationFolder="", $region="")
 $ErrorActionPreference = 'SilentlyContinue'
 
 Import-Module BitsTransfer
 
 if([string]::IsNullOrEmpty($sourceFileUrl) -eq $false -and [string]::IsNullOrEmpty($destinationFolder) -eq $false)
 {
-    if((Test-Path $destinationFolder) -eq $false)
-    {
+    if((Test-Path $destinationFolder) -eq $false) {
         New-Item -Path $destinationFolder -ItemType directory
     }
     $splitpath = $sourceFileUrl.Split("/")
@@ -16,6 +15,20 @@ if([string]::IsNullOrEmpty($sourceFileUrl) -eq $false -and [string]::IsNullOrEmp
     Start-BitsTransfer -Source $sourceFileUrl -Destination $destinationPath
 
     (new-object -com shell.application).namespace($destinationFolder).CopyHere((new-object -com shell.application).namespace($destinationPath).Items(),16)
+}
+
+if ([string]::IsNullOrEmpty($postBootScriptUrl) -eq $false -and [string]::IsNullOrEmpty($destinationFolder) -eq $false) {
+    if((Test-Path $destinationFolder) -eq $false) {
+        New-Item -Path $destinationFolder -ItemType directory
+    }
+    $splitpath = $postBootScriptUrl.Split("/")
+    $fileName = $splitpath[$splitpath.Length-1]
+    $destinationPath = Join-Path $destinationFolder $fileName
+
+    Start-BitsTransfer -Source $sourceFileUrl -Destination $destinationPath
+
+    $RunOnceKey = "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunOnce"
+    set-itemproperty $RunOnceKey "NextRun" ('C:\Windows\System32\WindowsPowerShell\v1.0\Powershell.exe -executionPolicy Unrestricted -File ' + $destinationPath)
 }
 
 # Disable IE ESC
@@ -64,15 +77,16 @@ $urlSQL = "https://go.microsoft.com/fwlink/?LinkID=853015"
 $outputWindows2016 = "$opsDir\Download\Windows_Server_2016_Datacenter_EVAL_en-us_14393_refresh.ISO"
 $outputWindows2012R2 = "$opsDir\Download\9600.17050.WINBLUE_REFRESH.140317-1640_X64FRE_SERVER_EVAL_EN-US-IR3_SSS_X64FREE_EN-US_DV9.ISO"
 $outputSQL = "$opsDir\Download\SQLServer2017-SSEI-Eval.exe"
+
+Start-BitsTransfer -Source $urlWindows2016 -Destination $outputWindows2016
+Start-BitsTransfer -Source $urlWindows2012R2 -Destination $outputWindows2012R2
+Start-BitsTransfer -Source $urlSQL -Destination $outputSQL
 #>
 $urlSSMS = "https://go.microsoft.com/fwlink/?linkid=2014306"
 $urlDMA = "https://download.microsoft.com/download/C/6/3/C63D8695-CEF2-43C3-AF0A-4989507E429B/DataMigrationAssistant.msi"
 $outputSSMS = "$opsDir\Download\SSMS-Setup-ENU.exe"
 $outputDMA = "$opsDir\Download\DataMigrationAssistant.msi"
 
-#Start-BitsTransfer -Source $urlWindows2016 -Destination $outputWindows2016
-#Start-BitsTransfer -Source $urlWindows2012R2 -Destination $outputWindows2012R2
-#Start-BitsTransfer -Source $urlSQL -Destination $outputSQL
 Start-BitsTransfer -Source $urlSSMS -Destination $outputSSMS
 Start-BitsTransfer -Source $urlDMA -Destination $outputDMA
 
@@ -82,68 +96,38 @@ Initialize-Disk -Number $disk.DiskNumber -PartitionStyle GPT
 New-Partition -DiskNumber $disk.DiskNumber -UseMaximumSize -DriveLetter F
 Format-Volume -DriveLetter F -FileSystem NTFS -NewFileSystemLabel DATA
 
-$RunOnceKey = "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunOnce"
-set-itemproperty $RunOnceKey "NextRun" ('C:\Windows\System32\WindowsPowerShell\v1.0\Powershell.exe -executionPolicy Unrestricted -File ' + "C:\OpsgilityTraining\PostRebootConfigure.ps1")
-
-# Set default download URIs for VHDs
-$urlsmarthotelad1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelAD1.zip"
-$urlsmarthotelweb1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelWeb1.zip"
-$urlsmarthotelweb2 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelWeb2.zip"
-$urlsmarthotelSQL1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelSQL1.zip"
-
-switch($region)
-{
-
-    "WestUS"
-    {
-        $urlsmarthotelad1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelAD1.zip"
-        $urlsmarthotelweb1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelWeb1.zip"
-        $urlsmarthotelweb2 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelWeb2.zip"
-        $urlsmarthotelSQL1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelSQL1.zip"
+switch($region) {
+    "WestUS" {
+        $storageAccountName = "opsgilitylabs"
     }
-    "EastUS"
-    {
-        $urlsmarthotelad1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelAD1.zip"
-        $urlsmarthotelweb1 = "https://opslabseastus.blob.core.windows.net/public/SmartHotelWeb1.zip"
-        $urlsmarthotelweb2 = "https://opslabseastus.blob.core.windows.net/public/SmartHotelWeb2.zip"
-        $urlsmarthotelSQL1 = "https://opslabseastus.blob.core.windows.net/public/SmartHotelSQL1.zip"
+    "EastUS" {
+        $storageAccountName = "opslabseastus"
     }
-    "SouthCentralUS"
-    {
-        $urlsmarthotelad1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelAD1.zip"
-        $urlsmarthotelweb1 = "https://opslabssouthcentral.blob.core.windows.net/public/SmartHotelWeb1.zip"
-        $urlsmarthotelweb2 = "https://opslabssouthcentral.blob.core.windows.net/public/SmartHotelWeb2.zip"
-        $urlsmarthotelSQL1 = "https://opslabssouthcentral.blob.core.windows.net/public/SmartHotelSQL1.zip"
+    "SouthCentralUS" {
+        $storageAccountName = "opslabssouthcentral"
     }
-    "NorthEurope"
-    {
-        $urlsmarthotelad1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelAD1.zip"
-        $urlsmarthotelweb1 = "https://opslabsnortheurope.blob.core.windows.net/public/SmartHotelWeb1.zip"
-        $urlsmarthotelweb2 = "https://opslabsnortheurope.blob.core.windows.net/public/SmartHotelWeb2.zip"
-        $urlsmarthotelSQL1 = "https://opslabsnortheurope.blob.core.windows.net/public/SmartHotelSQL1.zip"
+    "NorthEurope" {
+        $storageAccountName = "opslabsnortheurope"
     }
-    "WestEurope"
-    {
-        $urlsmarthotelad1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelAD1.zip"
-        $urlsmarthotelweb1 = "https://opslabsnortheurope.blob.core.windows.net/public/SmartHotelWeb1.zip"
-        $urlsmarthotelweb2 = "https://opslabsnortheurope.blob.core.windows.net/public/SmartHotelWeb2.zip"
-        $urlsmarthotelSQL1 = "https://opslabsnortheurope.blob.core.windows.net/public/SmartHotelSQL1.zip"
+    "WestEurope" {
+        $storageAccountName = "opslabsnortheurope"
     }
-    "AustraliaEast"
-    {
-        $urlsmarthotelad1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelAD1.zip"
-        $urlsmarthotelweb1 = "https://opslabsaustraliaeast.blob.core.windows.net/public/SmartHotelWeb1.zip"
-        $urlsmarthotelweb2 = "https://opslabsaustraliaeast.blob.core.windows.net/public/SmartHotelWeb2.zip"
-        $urlsmarthotelSQL1 = "https://opslabsaustraliaeast.blob.core.windows.net/public/SmartHotelSQL1.zip"
+    "AustraliaEast" {
+        $storageAccountName = "opslabsaustraliaeast"
     }
     "EastAsia"
     {
-        $urlsmarthotelad1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelAD1.zip"
-        $urlsmarthotelweb1 = "https://opslabseastasia.blob.core.windows.net/public/SmartHotelWeb1.zip"
-        $urlsmarthotelweb2 = "https://opslabseastasia.blob.core.windows.net/public/SmartHotelWeb2.zip"
-        $urlsmarthotelSQL1 = "https://opslabseastasia.blob.core.windows.net/public/SmartHotelSQL1.zip"
+        $storageAccountName = "opslabseastasia"
+    }
+    default {
+        $storageAccountName = "opsgilitylabs"
     }
 }
+
+$urlsmarthotelad1 = "https://opsgilitylabs.blob.core.windows.net/public/SmartHotelAD1.zip"
+$urlsmarthotelweb1 = "https://$storageAccountName.blob.core.windows.net/public/SmartHotelWeb1.zip"
+$urlsmarthotelweb2 = "https://$storageAccountName.blob.core.windows.net/public/SmartHotelWeb2.zip"
+$urlsmarthotelSQL1 = "https://$storageAccountName.blob.core.windows.net/public/SmartHotelSQL1.zip"
 
 $job0 = Start-BitsTransfer -Source $urlsmarthotelad1 -Destination "D:\SmartHotelAD1.zip" -Asynchronous
 $job1 = Start-BitsTransfer -Source $urlsmarthotelweb1 -Destination "D:\SmartHotelWeb1.zip" -Asynchronous
@@ -172,14 +156,11 @@ Complete-BitsTransfer -BitsJob $job1
 Complete-BitsTransfer -BitsJob $job2
 Complete-BitsTransfer -BitsJob $job3
 
-if ((Test-Path "F:\VirtualMachines") -eq $false)
-{
+if ((Test-Path "F:\VirtualMachines") -eq $false) {
     New-Item -Path "F:\VirtualMachines" -ItemType directory
 }
 
 $Destination = "F:\VirtualMachines\"
-
-Add-Type -assembly "system.io.compression.filesystem"
 
 (new-object -com shell.application).namespace("$Destination").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelWeb1.zip").Items(),16)
 (new-object -com shell.application).namespace("$Destination").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelWeb2.zip").Items(),16)

@@ -85,27 +85,49 @@ Function Set-VMNetworkConfiguration {
 
 # Create the NAT network
 $natName = "InternalNat"
-New-NetNat -Name $natName -InternalIPInterfaceAddressPrefix 192.168.0.0/24
+$nat = Get-NetNat | ? { $_.Name -eq $natName }
+if ($nat -eq $null) {
+    New-NetNat -Name $natName -InternalIPInterfaceAddressPrefix 192.168.0.0/24
+}
 
 # Create an internal switch with NAT
 $switchName = "InternalNATSwitch"
-New-VMSwitch -Name $switchName -SwitchType Internal
+$vmSwitch = Get-VMSwitch | ? { $_.Name -eq $switchName }
+if ($vmSwitch -eq $null) {
+    New-VMSwitch -Name $switchName -SwitchType Internal
+}
+
 $adapter = Get-NetAdapter | ? { $_.Name -like "*$($switchName)*" }
 # Create an internal network (gateway first)
-New-NetIPAddress -IPAddress 192.168.0.1 -PrefixLength 24 -InterfaceIndex $adapter.ifIndex
+$ipAddress = Get-NetIPAddress | ? { $_.IPAddress -eq "192.168.0.1" }
+if ($ipAddress -eq $null) {
+    New-NetIPAddress -IPAddress 192.168.0.1 -PrefixLength 24 -InterfaceIndex $adapter.ifIndex
+}
 
 # Add a NAT forwarder for Web1 and SQL1 
-Add-NetNatStaticMapping -ExternalIPAddress "0.0.0.0" -ExternalPort 80 -Protocol TCP -InternalIPAddress "192.168.0.4" -InternalPort 80 -NatName $natName
-Add-NetNatStaticMapping -ExternalIPAddress "0.0.0.0" -ExternalPort 1433 -Protocol TCP -InternalIPAddress "192.168.0.6" -InternalPort 1433 -NatName $natName
+$web1Nat = Get-NetNatStaticMapping | ? { $_.InternalIPAddress -eq "192.168.0.4" }
+if ($web1Nat -eq $null) {
+    Add-NetNatStaticMapping -ExternalIPAddress "0.0.0.0" -ExternalPort 80 -Protocol TCP -InternalIPAddress "192.168.0.4" -InternalPort 80 -NatName $natName
+}    
+$sql1Nat = Get-NetNatStaticMapping | ? { $_.InternalIPAddress -eq "192.168.0.6" }
+if ($sql1Nat -eq $null) {
+    Add-NetNatStaticMapping -ExternalIPAddress "0.0.0.0" -ExternalPort 1433 -Protocol TCP -InternalIPAddress "192.168.0.6" -InternalPort 1433 -NatName $natName
+}
 
 # Add a firewall rule for Web and SQL
-New-NetFirewallRule -DisplayName "SmartHotel.Registration Inbound" -Direction Inbound -LocalPort 80 -Protocol TCP -Action Allow
-New-NetFirewallRule -DisplayName "Microsoft SQL Server Inbound" -Direction Inbound -LocalPort 1433 -Protocol TCP -Action Allow
+$shRegistrationRule = Get-NetFirewallRule | ? { $_.DisplayName -eq "SmartHotel.Registration Inbound" }
+if ($shRegistrationRule -eq $null) {
+    New-NetFirewallRule -DisplayName "SmartHotel.Registration Inbound" -Direction Inbound -LocalPort 80 -Protocol TCP -Action Allow
+}
+$shSQLRule = Get-NetFirewallRule | ? { $_.DisplayName -eq "Microsoft SQL Server Inbound" }
+if ($shSQLRule -eq $null) {
+    New-NetFirewallRule -DisplayName "Microsoft SQL Server Inbound" -Direction Inbound -LocalPort 1433 -Protocol TCP -Action Allow
+}
 
 # Enable Enhanced Session Mode on Host
 Set-VMHost -EnableEnhancedSessionMode $true
 
-# Set VM Name, Switch Name, and Installation Media Path.
+# Set VM Names.
 $vmNameAD1 = "SmartHotelAD1"
 $vmNameWeb1 = "SmartHotelWeb1"
 $vmNameWeb2 = "SmartHotelWeb2"
@@ -135,9 +157,9 @@ $localcredential = New-Object System.Management.Automation.PSCredential ($localu
 $domainusername = "SH360\Administrator"
 $domaincredential = New-Object System.Management.Automation.PSCredential ($domainusername, $password)
 
-for ($i = 4; $i -le 7; $i++) {
+for ($i = 4; $i -lt 7; $i++) {
     Invoke-Command -ComputerName "192.168.0.$i" -ScriptBlock { 
-        slmgr.vbs /rearm
-        Add-Computer –domainname "sh360.local" -Credential $domaincredential -restart –force 
+        #slmgr.vbs /rearm;
+        Add-Computer –domainname "sh360.local" -Credential $Using:domaincredential -restart –force 
     } -Credential $localcredential
 }

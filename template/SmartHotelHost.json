@@ -31,6 +31,10 @@
           "studentFilesDestination": {
             "type": "string",
             "defaultValue": "C:\\OpsgilityTraining"
+        },
+        "postBootScriptUrl": {
+            "type": "string",
+            "defaultValue": "https://raw.githubusercontent.com/ciphertxt/cw-smart-hotel-360-iaas/master/support/PostRebootConfigure.ps1"
         }
     },
     "variables": {
@@ -136,7 +140,7 @@
                       "fileUris": [
                         "[variables('customScriptUri')]"
                       ],
-                      "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('customScriptFolder'), '/', variables('customScriptUriScriptFileName'), ' -sourceFileUrl ', parameters('studentFilesUrl'), ' -destinationFolder ', parameters('studentFilesDestination'), ' -region ', variables('region'))]"
+                      "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('customScriptFolder'), '/', variables('customScriptUriScriptFileName'), ' -postBootScriptUrl ', parameters('postBootScriptUrl'), ' -sourceFileUrl ', parameters('studentFilesUrl'), ' -destinationFolder ', parameters('studentFilesDestination'), ' -region ', variables('region'))]"
                     }
                   }
                 }
