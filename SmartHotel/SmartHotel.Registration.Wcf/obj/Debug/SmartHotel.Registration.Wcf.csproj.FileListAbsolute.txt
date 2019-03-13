@@ -1,0 +1,10 @@
+C:\OpsgilityTraining\SmartHotel360\SmartHotel360-AppModernization\src\SmartHotel.Registration.Wcf\bin\SmartHotel.Registration.Wcf.dll.config
+C:\OpsgilityTraining\SmartHotel360\SmartHotel360-AppModernization\src\SmartHotel.Registration.Wcf\bin\SmartHotel.Registration.Wcf.dll
+C:\OpsgilityTraining\SmartHotel360\SmartHotel360-AppModernization\src\SmartHotel.Registration.Wcf\bin\SmartHotel.Registration.Wcf.pdb
+C:\OpsgilityTraining\SmartHotel360\SmartHotel360-AppModernization\src\SmartHotel.Registration.Wcf\bin\EntityFramework.dll
+C:\OpsgilityTraining\SmartHotel360\SmartHotel360-AppModernization\src\SmartHotel.Registration.Wcf\bin\EntityFramework.SqlServer.dll
+C:\OpsgilityTraining\SmartHotel360\SmartHotel360-AppModernization\src\SmartHotel.Registration.Wcf\bin\EntityFramework.xml
+C:\OpsgilityTraining\SmartHotel360\SmartHotel360-AppModernization\src\SmartHotel.Registration.Wcf\bin\EntityFramework.SqlServer.xml
+C:\OpsgilityTraining\SmartHotel360\SmartHotel360-AppModernization\src\SmartHotel.Registration.Wcf\obj\Debug\SmartHotel.Registration.Wcf.csprojResolveAssemblyReference.cache
+C:\OpsgilityTraining\SmartHotel360\SmartHotel360-AppModernization\src\SmartHotel.Registration.Wcf\obj\Debug\SmartHotel.Registration.Wcf.dll
+C:\OpsgilityTraining\SmartHotel360\SmartHotel360-AppModernization\src\SmartHotel.Registration.Wcf\obj\Debug\SmartHotel.Registration.Wcf.pdb
