@@ -239,48 +239,50 @@
             }
         },
         {
-            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
-            "name": "[concat(variables('smarthotelhostNSGname'), '/', variables('rdpRulename'))]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('smarthotelhostNSGname')]",
             "apiVersion": "2018-08-01",
+            "location": "[resourceGroup().location]",
+            "tags": {},
             "properties": {
-                "protocol": "TCP",
-                "sourcePortRange": "*",
-                "destinationPortRange": "3389",
-                "sourceAddressPrefix": "*",
-                "destinationAddressPrefix": "*",
-                "access": "Allow",
-                "priority": 301,
-                "direction": "Inbound",
-                "sourcePortRanges": [],
-                "destinationPortRanges": [],
-                "sourceAddressPrefixes": [],
-                "destinationAddressPrefixes": []
+                "securityRules": [
+                    {
+                        "name": "[variables('rdpRulename')]",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "3389",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 301,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "[variables('webRulename')]",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "80",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 300,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    }
+                ]
             },
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('smarthotelhostNSGname'))]"
-            ]
-        },
-        {
-            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
-            "name": "[concat(variables('smarthotelhostNSGname'), '/', variables('webRulename'))]",
-            "apiVersion": "2018-08-01",
-            "properties": {
-                "protocol": "TCP",
-                "sourcePortRange": "*",
-                "destinationPortRange": "80",
-                "sourceAddressPrefix": "*",
-                "destinationAddressPrefix": "*",
-                "access": "Allow",
-                "priority": 300,
-                "direction": "Inbound",
-                "sourcePortRanges": [],
-                "destinationPortRanges": [],
-                "sourceAddressPrefixes": [],
-                "destinationAddressPrefixes": []
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('smarthotelhostNSGname'))]"
-            ]
+            "dependsOn": []
         },
         {
             "apiVersion": "2015-11-01",
