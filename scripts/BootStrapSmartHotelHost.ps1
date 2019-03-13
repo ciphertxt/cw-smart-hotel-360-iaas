@@ -41,7 +41,7 @@ Start-Process -FilePath $Path\$Installer -Args "/silent /install" -Verb RunAs -W
 Remove-Item $Path\$Installer
 
 # Enable trusted remoting
-Set-Item wsman:\localhost\client\trustedhosts *
+Set-Item wsman:\localhost\client\trustedhosts * -Force
 
 # Download resources
 $opsDir = "C:\OpsgilityTraining"
@@ -154,7 +154,7 @@ $jobs = Get-BitsTransfer
 while($true) {
     $complete = $true
     foreach($job in $jobs) {
-        Write-Output "Status: " $job.JobState
+        Write-Output "Status: $($job.JobState)" 
         if($job.JobState -ne "Transferred") {
             Start-Sleep -Seconds 5
             $complete = $false
