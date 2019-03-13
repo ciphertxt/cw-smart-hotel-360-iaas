@@ -191,35 +191,6 @@
             ]
         },
         {
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "name": "[variables('smarthotelhostNSGname')]",
-            "apiVersion": "2018-08-01",
-            "location": "[resourceGroup().location]",
-            "tags": {},
-            "properties": {
-                "securityRules": [
-                    {
-                        "name": "[variables('rdpRulename')]",
-                        "properties": {
-                            "protocol": "TCP",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "3389",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 300,
-                            "direction": "Inbound",
-                            "sourcePortRanges": [],
-                            "destinationPortRanges": [],
-                            "sourceAddressPrefixes": [],
-                            "destinationAddressPrefixes": []
-                        }
-                    }
-                ]
-            },
-            "dependsOn": []
-        },
-        {
             "type": "Microsoft.Network/publicIPAddresses",
             "sku": {
                 "name": "Basic",
