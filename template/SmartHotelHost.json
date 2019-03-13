@@ -26,7 +26,7 @@
         },
         "studentFilesUrl": {
             "type": "string",
-            "defaultValue": "https://opsgilitylabs.blob.core.windows.net/online-labs/migrating-on-premises-to-azure/StudentFiles.zip"
+            "defaultValue": "https://github.com/ciphertxt/cw-smart-hotel-360-iaas/raw/master/support/StudentFiles.zip"
         },
           "studentFilesDestination": {
             "type": "string",
