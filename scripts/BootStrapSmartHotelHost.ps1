@@ -25,7 +25,7 @@ if ([string]::IsNullOrEmpty($postBootScriptUrl) -eq $false -and [string]::IsNull
     $fileName = $splitpath[$splitpath.Length-1]
     $destinationPath = Join-Path $destinationFolder $fileName
 
-    Start-BitsTransfer -Source $sourceFileUrl -Destination $destinationPath
+    Start-BitsTransfer -Source $postBootScriptUrl -Destination $destinationPath
 
     $RunOnceKey = "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunOnce"
     set-itemproperty $RunOnceKey "NextRun" ('C:\Windows\System32\WindowsPowerShell\v1.0\Powershell.exe -executionPolicy Unrestricted -File ' + $destinationPath)

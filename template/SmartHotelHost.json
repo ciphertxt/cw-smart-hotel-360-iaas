@@ -34,7 +34,7 @@
         },
         "postBootScriptUrl": {
             "type": "string",
-            "defaultValue": "https://raw.githubusercontent.com/ciphertxt/cw-smart-hotel-360-iaas/master/support/PostRebootConfigure.ps1"
+            "defaultValue": "https://raw.githubusercontent.com/ciphertxt/cw-smart-hotel-360-iaas/master/scripts/PostRebootConfigure.ps1"
         }
     },
     "variables": {
