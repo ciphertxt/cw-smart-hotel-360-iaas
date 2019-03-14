@@ -31,6 +31,20 @@
                 "description": "Name of the AD domain"
             }
         },
+        "existingVNetResourceGroup": {
+            "type": "string",
+            "defaultValue": "SH360",
+            "metadata": {
+                "description": "Name of the resource group that contains the remote VNet"
+            }
+        },
+        "existingVNetName": {
+            "type": "string",
+            "defaultValue": "smarthotelvnet",
+            "metadata": {
+                "description": "Name of the remote VNet"
+            }
+        },
         "_artifactsLocation": {
             "type": "string",
             "metadata": {
@@ -64,6 +78,9 @@
         "smarthotelSubnetname": "host",
         "smarthotelNSGname": "[concat(parameters('smartHotelName'),'nsg')]",
         "rdpRulename": "RDP",
+        "remoteVNet": "[resourceId(parameters('existingVNetResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('existingVNetName'))]",
+        "peeringNameCloud": "[concat(variables('smarthotelVNETname'), '/peering-to-on-prem')]",
+        "peeringNameOnPrem": "[concat(parameters('existingVNetName'), '/peering-to-cloud')]",
         "region": "[resourceGroup().location]",
         "labName": "MCW-SQL-Server-Hybrid-Cloud"
     },
@@ -138,7 +155,9 @@
                     "apiVersion": "2017-03-30",
                     "location": "[resourceGroup().location]",
                     "dependsOn": [
-                        "[resourceId('Microsoft.Compute/virtualMachines', variables('smarthotelad2VMname'))]"
+                        "[resourceId('Microsoft.Compute/virtualMachines', variables('smarthotelad2VMname'))]",
+                        "[resourceId('Microsoft.Network/virtualNetworks/virtualNetworkPeerings/', variables('peeringNameCloud'))]",
+                        "[resourceId('Microsoft.Network/virtualNetworks/virtualNetworkPeerings/', variables('peeringNameOnPrem'))]"
                     ],
                     "properties": {
                         "publisher": "Microsoft.Powershell",
@@ -468,6 +487,43 @@
                 }
               ]
             }
+        },
+        {
+            "apiVersion": "2016-06-01",
+            "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+            "name": "[variables('peeringNameCloud')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+              "allowVirtualNetworkAccess": true,
+              "allowForwardedTraffic": false,
+              "allowGatewayTransit": false,
+              "useRemoteGateways": false,
+              "remoteVirtualNetwork": {
+                "id": "[variables('remoteVNet')]"
+              }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/', variables('smarthotelVNETname'))]"
+            ]
+        },
+        {
+            "apiVersion": "2016-06-01",
+            "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+            "name": "[variables('peeringNameOnPrem')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+              "allowVirtualNetworkAccess": true,
+              "allowForwardedTraffic": false,
+              "allowGatewayTransit": false,
+              "useRemoteGateways": false,
+              "remoteVirtualNetwork": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks', variables('smarthotelVNETname'))]"
+              }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/', variables('smarthotelVNETname'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/virtualNetworkPeerings/', variables('peeringNameCloud'))]"
+            ]
         },
         {
             "type": "Microsoft.Network/networkSecurityGroups",
