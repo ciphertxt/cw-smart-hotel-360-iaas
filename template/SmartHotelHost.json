@@ -310,7 +310,7 @@
                   "name": "smarthotel360local",
                   "type": "Microsoft.Network/trafficManagerProfiles/azureEndpoints",
                   "properties": {
-                    "targetResourceId": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('publicIPAddressName'), 0))]",
+                    "targetResourceId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
                     "endpointStatus": "Enabled",
                     "weight": 1,
                     "priority": 1
