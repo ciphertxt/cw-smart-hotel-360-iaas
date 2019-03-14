@@ -186,6 +186,7 @@ for ($i = 4; $i -le 7; $i++) {
     } else {
         Invoke-Command -ComputerName "192.168.0.$i" -ScriptBlock { 
             slmgr.vbs /rearm
+            Restart-Computer -Force
         } -Credential $domaincredential
     }
 }
