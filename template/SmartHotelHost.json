@@ -24,6 +24,13 @@
                 "description": "Name of the SmartHotel Host machine"
             }
         },
+        "deployNestedDomainController": {
+            "type": "bool",
+            "defaultValue": "false",
+            "metadata": {
+                "description": "Deploy a nested domain controller"
+            }
+        },
         "studentFilesUrl": {
             "type": "string",
             "defaultValue": "https://github.com/ciphertxt/cw-smart-hotel-360-iaas/raw/master/support/StudentFiles.zip"
@@ -143,7 +150,7 @@
                       "fileUris": [
                         "[variables('customScriptUri')]"
                       ],
-                      "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('customScriptFolder'), '/', variables('customScriptUriScriptFileName'), ' -postBootScriptUrl ', parameters('postBootScriptUrl'), ' -sourceFileUrl ', parameters('studentFilesUrl'), ' -destinationFolder ', parameters('studentFilesDestination'), ' -region ', variables('region'))]"
+                      "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('customScriptFolder'), '/', variables('customScriptUriScriptFileName'), ' -postBootScriptUrl ', parameters('postBootScriptUrl'), ' -sourceFileUrl ', parameters('studentFilesUrl'), ' -destinationFolder ', parameters('studentFilesDestination'), ' -region ', variables('region'), ' -deployDC $', parameters('deployNestedDomainController')]"
                     }
                   }
                 }

@@ -1,4 +1,4 @@
-param($postBootScriptUrl = "", $sourceFileUrl="", $destinationFolder="", $region="")
+param($postBootScriptUrl = "", $sourceFileUrl="", $destinationFolder="", $region="", $deployDC=$false)
 $ErrorActionPreference = 'SilentlyContinue'
 
 Import-Module BitsTransfer
@@ -129,7 +129,9 @@ $urlsmarthotelweb1 = "https://$storageAccountName.blob.core.windows.net/public/S
 $urlsmarthotelweb2 = "https://$storageAccountName.blob.core.windows.net/public/SmartHotelWeb2.zip"
 $urlsmarthotelSQL1 = "https://$storageAccountName.blob.core.windows.net/public/SmartHotelSQL1.zip"
 
-$job0 = Start-BitsTransfer -Source $urlsmarthotelad1 -Destination "D:\SmartHotelAD1.zip" -Asynchronous
+if ($deployDC -eq $true) {
+    $job0 = Start-BitsTransfer -Source $urlsmarthotelad1 -Destination "D:\SmartHotelAD1.zip" -Asynchronous
+}
 $job1 = Start-BitsTransfer -Source $urlsmarthotelweb1 -Destination "D:\SmartHotelWeb1.zip" -Asynchronous
 $job2 = Start-BitsTransfer -Source $urlsmarthotelweb2 -Destination "D:\SmartHotelWeb2.zip" -Asynchronous
 $job3 = Start-BitsTransfer -Source $urlsmarthotelSQL1 -Destination "D:\SmartHotelSQL1.zip" -Asynchronous
@@ -151,7 +153,9 @@ while($true) {
     $jobs = Get-BitsTransfer
 }
 
-Complete-BitsTransfer -BitsJob $job0
+if ($deployDC -eq $true) {
+    Complete-BitsTransfer -BitsJob $job0
+}
 Complete-BitsTransfer -BitsJob $job1
 Complete-BitsTransfer -BitsJob $job2
 Complete-BitsTransfer -BitsJob $job3
@@ -162,9 +166,11 @@ if ((Test-Path "F:\VirtualMachines") -eq $false) {
 
 $Destination = "F:\VirtualMachines\"
 
+if ($deployDC -eq $true) {
+    (new-object -com shell.application).namespace("$Destination").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelAD1.zip").Items(),16)
+}
 (new-object -com shell.application).namespace("$Destination").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelWeb1.zip").Items(),16)
 (new-object -com shell.application).namespace("$Destination").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelWeb2.zip").Items(),16)
 (new-object -com shell.application).namespace("$Destination").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelSQL1.zip").Items(),16)
-(new-object -com shell.application).namespace("$Destination").CopyHere((new-object -com shell.application).namespace("D:\SmartHotelAD1.zip").Items(),16)
 
 Install-WindowsFeature -Name Hyper-V -IncludeManagementTools -Restart
