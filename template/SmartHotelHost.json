@@ -177,7 +177,8 @@
             },
             "dependsOn": [
                 "[resourceId('Microsoft.Network/networkInterfaces', variables('smarthotelhostNICname'))]",
-                "[resourceId('Microsoft.Compute/disks/', variables('smarthotelhostDATAdisk'))]"
+                "[resourceId('Microsoft.Compute/disks/', variables('smarthotelhostDATAdisk'))]",
+                "[resourceId('Microsoft.Compute/virtualMachines', variables('smarthotelad1VMname'))]"
             ],
             "resources": [
                 {
