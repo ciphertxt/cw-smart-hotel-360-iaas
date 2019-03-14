@@ -157,26 +157,18 @@ for ($i=30;$i -gt 1;$i--) {
 }
 
 # Domain join the VMs and rearm the eval
-<#Write-Output "Configuring VMs..."
+Write-Output "Configuring VMs..."
 $localusername = "Administrator"
 $password = ConvertTo-SecureString "demo@pass123" -AsPlainText -Force
 $localcredential = New-Object System.Management.Automation.PSCredential ($localusername, $password)
-$domainusername = "SH360\Administrator"
+$domainusername = "SH360\demouser"
 $domaincredential = New-Object System.Management.Automation.PSCredential ($domainusername, $password)
 $vmStopIP = 6
 
 for ($i = 4; $i -le $vmStopIP; $i++) {
-    if ($i -lt 7) {
-        Invoke-Command -ComputerName "192.168.0.$i" -ScriptBlock { 
-            slmgr.vbs /rearm
-            net accounts /maxpwage:unlimited
-            Add-Computer -DomainName "sh360.local" -Credential $Using:domaincredential -Restart -Force 
-        } -Credential $localcredential
-    } else {
-        Invoke-Command -ComputerName "192.168.0.$i" -ScriptBlock { 
-            slmgr.vbs /rearm
-            Restart-Computer -Force
-        } -Credential $domaincredential
-    }
+    Invoke-Command -ComputerName "192.168.0.$i" -ScriptBlock { 
+        slmgr.vbs /rearm
+        net accounts /maxpwage:unlimited
+        Add-Computer -DomainName "sh360.local" -Credential $Using:domaincredential -Restart -Force 
+    } -Credential $localcredential
 }
-#>
