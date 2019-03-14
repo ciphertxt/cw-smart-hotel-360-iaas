@@ -128,36 +128,18 @@ if ($shSQLRule -eq $null) {
 Set-VMHost -EnableEnhancedSessionMode $true
 
 # Set VM Names.
-$vmNameAD1 = "SmartHotelAD1"
 $vmNameWeb1 = "SmartHotelWeb1"
 $vmNameWeb2 = "SmartHotelWeb2"
 $vmNameSQL1 = "SmartHotelSQL1"
 $opsDir = "F:\VirtualMachines"
 
-if (Test-Path -Path "$opsdir\$vmNameAD1\$vmNameAD1.vhdx" -PathType Leaf) {
-    New-VM -Name $vmNameAD1 -MemoryStartupBytes 2GB -BootDevice VHD -VHDPath "$opsdir\$vmNameAD1\$vmNameAD1.vhdx" -Path "$opsdir\$vmNameAD1" -Generation 2 -Switch $switchName
-}
 New-VM -Name $vmNameWeb1 -MemoryStartupBytes 4GB -BootDevice VHD -VHDPath "$opsdir\$vmNameWeb1\$vmNameWeb1.vhdx" -Path "$opsdir\$vmNameWeb1" -Generation 2 -Switch $switchName
 New-VM -Name $vmNameWeb2 -MemoryStartupBytes 4GB -BootDevice VHD -VHDPath "$opsdir\$vmNameWeb2\$vmNameWeb2.vhdx" -Path "$opsdir\$vmNameWeb2" -Generation 2 -Switch $switchName 
 New-VM -Name $vmNameSQL1 -MemoryStartupBytes 4GB -BootDevice VHD -VHDPath "$opsdir\$vmNameSQL1\$vmNameSQL1.vhdx" -Path "$opsdir\$vmNameSQL1" -Generation 2 -Switch $switchName  
 
-if (Test-Path -Path "$opsdir\$vmNameAD1\$vmNameAD1.vhdx" -PathType Leaf) {
-    Get-VMNetworkAdapter -VMName $vmNameAD1 | Set-VMNetworkConfiguration -IPAddress "192.168.0.7" -Subnet "255.255.255.0" -DefaultGateway "192.168.0.1" -DNSServer "192.168.0.7"
-}
 Get-VMNetworkAdapter -VMName $vmNameWeb1 | Set-VMNetworkConfiguration -IPAddress "192.168.0.4" -Subnet "255.255.255.0" -DefaultGateway "192.168.0.1" -DNSServer "192.168.0.7"
 Get-VMNetworkAdapter -VMName $vmNameWeb2 | Set-VMNetworkConfiguration -IPAddress "192.168.0.5" -Subnet "255.255.255.0" -DefaultGateway "192.168.0.1" -DNSServer "192.168.0.7"
 Get-VMNetworkAdapter -VMName $vmNameSQL1 | Set-VMNetworkConfiguration -IPAddress "192.168.0.6" -Subnet "255.255.255.0" -DefaultGateway "192.168.0.1" -DNSServer "192.168.0.7"
-
-if (Test-Path -Path "$opsdir\$vmNameAD1\$vmNameAD1.vhdx" -PathType Leaf) {
-    # Start the domain controller
-    Get-VM -Name $vmNameAD1 | Start-VM
-
-    # Give the VMs time to come up with a 30 sec wait
-    for ($i=30;$i -gt 1;$i--) {
-        Write-Progress -Activity "Starting $vmNameAD1..." -SecondsRemaining $i
-        Start-Sleep -s 1
-    }
-}
 
 # Start the SQL server
 Get-VM -Name $vmNameSQL1 | Start-VM
@@ -175,18 +157,13 @@ for ($i=30;$i -gt 1;$i--) {
 }
 
 # Domain join the VMs and rearm the eval
-Write-Output "Configuring VMs..."
+<#Write-Output "Configuring VMs..."
 $localusername = "Administrator"
 $password = ConvertTo-SecureString "demo@pass123" -AsPlainText -Force
 $localcredential = New-Object System.Management.Automation.PSCredential ($localusername, $password)
 $domainusername = "SH360\Administrator"
 $domaincredential = New-Object System.Management.Automation.PSCredential ($domainusername, $password)
-
-if (Test-Path -Path "$opsdir\$vmNameAD1\$vmNameAD1.vhdx" -PathType Leaf) {
-    $vmStopIP = 7
-} else {
-    $vmStopIP = 6
-}
+$vmStopIP = 6
 
 for ($i = 4; $i -le $vmStopIP; $i++) {
     if ($i -lt 7) {
@@ -202,3 +179,4 @@ for ($i = 4; $i -le $vmStopIP; $i++) {
         } -Credential $domaincredential
     }
 }
+#>

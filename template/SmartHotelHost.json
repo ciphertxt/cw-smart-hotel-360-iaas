@@ -17,18 +17,11 @@
               "description": "Password for the Virtual Machine."
             }
         },
-        "smarthotelhostVMname": {
-            "defaultValue": "smarthotelhost",
+        "smartHotelName": {
+            "defaultValue": "smarthotel",
             "type": "string",
             "metadata": {
                 "description": "Name of the SmartHotel Host machine"
-            }
-        },
-        "deployNestedDomainController": {
-            "type": "bool",
-            "defaultValue": "false",
-            "metadata": {
-                "description": "Deploy a nested domain controller"
             }
         },
         "studentFilesUrl": {
@@ -45,19 +38,24 @@
         }
     },
     "variables": {
-        "smarthotelhostNICname": "smarthotelhostnic",
-        "smarthotelhostOSdisk": "[concat(parameters('smarthotelhostVMname'),'_osdisk')]",
-        "smarthotelhostDATAdisk": "[concat(parameters('smarthotelhostVMname'),'_datadisk')]",
-        "publicIPAddressName": "smarthotelhostip",
-        "smarthotelVNETname": "smarthotelvnet",
+        "smarthotelhostVMname": "[concat(parameters('smartHotelName'),'host')]",
+        "smarthotelhostNICname": "[concat(variables('smarthotelhostVMname'),'nic')]",
+        "smarthotelad1VMname": "[concat(parameters('smartHotelName'),'ad1')]",
+        "smarthotelad1NICname": "[concat(variables('smarthotelad1VMname'),'nic')]",
+        "smarthotelhostOSdisk": "[concat(variables('smarthotelhostVMname'),'_osdisk')]",
+        "smarthotelad1OSdisk": "[concat(variables('smarthotelad1VMname'),'_osdisk')]",
+        "smarthotelhostDATAdisk": "[concat(variables('smarthotelhostVMname'),'_datadisk')]",
+        "publicIPAddressName": "[concat(variables('smarthotelhostVMname'), 'ip')]",
+        "publicIPAddressNameAD": "[concat(variables('smarthotelad1VMname'), 'ip')]",
+        "smarthotelVNETname": "[concat(parameters('smartHotelName'),'vnet')]",
         "addressPrefix": "10.0.0.0/16",
         "subnetPrefix": "10.0.0.0/24",
         "smarthotelSubnetname": "host",
-        "smarthotelhostNSGname": "smarthotelhostnsg",
+        "smarthotelhostNSGname": "[concat(parameters('smartHotelName'),'nsg')]",
         "rdpRulename": "RDP",
         "webRulename": "HTTP",
-        "smarthotelhostTMName": "smarthoteltm",
-        "uniquePublicIPName": "[concat('smarthotelweb', '-', uniqueString(resourceGroup().id))]",
+        "smarthotelhostTMName": "[concat(parameters('smartHotelName'),'tm')]",
+        "uniquePublicIPName": "[concat(parameters('smartHotelName'), 'web', '-', uniqueString(resourceGroup().id))]",
         "uniqueTMName": "[concat(variables('smarthotelhostTMName'), '-', uniqueString(resourceGroup().id))]",
         "customScriptFolder": "./",
         "customScriptUriScriptFileName": "BootStrapSmartHotelHost.ps1",
@@ -68,7 +66,59 @@
     "resources": [
         {
             "type": "Microsoft.Compute/virtualMachines",
-            "name": "[parameters('smarthotelhostVMname')]",
+            "name": "[variables('smarthotelad1VMname')]",
+            "apiVersion": "2018-06-01",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "Lab": "[variables('labName')]"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_D2s_v3"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2016-Datacenter",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Windows",
+                        "name": "[variables('smarthotelad1OSdisk')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS"
+                        },
+                        "diskSizeGB": 127
+                    }
+                },
+                "osProfile": {
+                    "computerName": "[variables('smarthotelad1VMname')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true
+                    },
+                    "allowExtensionOperations": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('smarthotelad1NICname'))]"
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('smarthotelad1NICname'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[variables('smarthotelhostVMname')]",
             "apiVersion": "2018-06-01",
             "location": "[resourceGroup().location]",
             "tags": {
@@ -108,7 +158,7 @@
                     ]
                 },
                 "osProfile": {
-                    "computerName": "[parameters('smarthotelhostVMname')]",
+                    "computerName": "[variables('smarthotelhostVMname')]",
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPassword')]",
                     "windowsConfiguration": {
@@ -136,7 +186,7 @@
                   "location": "[resourceGroup().location]",
                   "apiVersion": "2016-03-30",
                   "dependsOn": [
-                    "[resourceId('Microsoft.Compute/virtualMachines', parameters('smarthotelhostVMname'))]"
+                    "[resourceId('Microsoft.Compute/virtualMachines', variables('smarthotelhostVMname'))]"
                   ],
                   "tags": {
                     "displayName": "ConfigureHost"
@@ -150,7 +200,7 @@
                       "fileUris": [
                         "[variables('customScriptUri')]"
                       ],
-                      "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('customScriptFolder'), '/', variables('customScriptUriScriptFileName'), ' -postBootScriptUrl ', parameters('postBootScriptUrl'), ' -sourceFileUrl ', parameters('studentFilesUrl'), ' -destinationFolder ', parameters('studentFilesDestination'), ' -region ', variables('region'), ' -deployDC $', parameters('deployNestedDomainController')]"
+                      "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('customScriptFolder'), '/', variables('customScriptUriScriptFileName'), ' -postBootScriptUrl ', parameters('postBootScriptUrl'), ' -sourceFileUrl ', parameters('studentFilesUrl'), ' -destinationFolder ', parameters('studentFilesDestination'), ' -region ', variables('region'))]"
                     }
                   }
                 }
@@ -201,13 +251,71 @@
                 },
                 "primary": true,
                 "virtualMachine": {
-                    "id": "[resourceId('Microsoft.Compute/virtualMachines', parameters('smarthotelhostVMname'))]"
+                    "id": "[resourceId('Microsoft.Compute/virtualMachines', variables('smarthotelhostVMname'))]"
                 }
             },
             "dependsOn": [
                 "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
                 "[resourceId('Microsoft.Network/virtualNetworks/', variables('smarthotelVNETname'))]"
             ]
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[variables('smarthotelad1NICname')]",
+            "apiVersion": "2018-08-01",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "Lab": "[variables('labName')]"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressNameAD'))]"
+                            },
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('smarthotelVNETname'), variables('smarthotelSubnetname'))]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4"
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('smarthotelhostNSGname'))]"
+                },
+                "primary": true,
+                "virtualMachine": {
+                    "id": "[resourceId('Microsoft.Compute/virtualMachines', variables('smarthotelad1VMname'))]"
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressNameAD'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/', variables('smarthotelVNETname'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "sku": {
+                "name": "Basic",
+                "tier": "Regional"
+            },
+            "name": "[variables('publicIPAddressNameAD')]",
+            "apiVersion": "2018-08-01",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "Lab": "[variables('labName')]"
+            },
+            "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Dynamic",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": []
+            },
+            "dependsOn": []
         },
         {
             "type": "Microsoft.Network/publicIPAddresses",
