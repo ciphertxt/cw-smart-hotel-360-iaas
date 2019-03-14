@@ -255,7 +255,8 @@
                   "location": "[resourceGroup().location]",
                   "apiVersion": "2016-03-30",
                   "dependsOn": [
-                    "[resourceId('Microsoft.Compute/virtualMachines', variables('smarthotelhostVMname'))]"
+                    "[resourceId('Microsoft.Compute/virtualMachines', variables('smarthotelhostVMname'))]",
+                    "[resourceId('Microsoft.Compute/virtualMachines/extensions', variables('smarthotelad1VMname'), 'CreateADForest')]"
                   ],
                   "tags": {
                     "displayName": "ConfigureHost"
