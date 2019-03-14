@@ -145,26 +145,31 @@ Get-VMNetworkAdapter -VMName $vmNameWeb2 | Set-VMNetworkConfiguration -IPAddress
 Get-VMNetworkAdapter -VMName $vmNameSQL1 | Set-VMNetworkConfiguration -IPAddress "192.168.0.6" -Subnet "255.255.255.0" -DefaultGateway "192.168.0.1" -DNSServer "192.168.0.7"
 
 # Start the domain controller
-Write-Output "Starting $vmNameAD1..."
 Get-VM -Name $vmNameAD1 | Start-VM
 
 # Give the VMs time to come up with a 30 sec wait
-Start-Sleep -s 30
+for ($i=30;i -gt 1;i--) {
+    Write-Progress -Activity "Starting $vmNameAD1..." -SecondsRemaining $i
+    Start-Sleep -s 1
+}
 
 # Start the SQL server
-Write-Output "Starting $vmNameSQL1..."
 Get-VM -Name $vmNameSQL1 | Start-VM
-
-# Give the VMs time to come up with a 30 sec wait
-Start-Sleep -s 30
+for ($i=30;i -gt 1;i--) {
+    Write-Progress -Activity "Starting $vmNameSQL1..." -SecondsRemaining $i
+    Start-Sleep -s 1
+}
 
 # Start the remaining VMs
-Write-Output "Starting remaining VMs..."
 Get-VM | ? {$_.State -eq 'Off'} | Start-VM
-# Give the VMs time to come up with a 30 sec wait
-Start-Sleep -s 30
+
+for ($i=30;i -gt 1;i--) {
+    Write-Progress -Activity "Starting remaining VMs..." -SecondsRemaining $i
+    Start-Sleep -s 1
+}
 
 # Domain join the VMs and rearm the eval
+Write-Output "Configuring VMs..."
 $localusername = "Administrator"
 $password = ConvertTo-SecureString "demo@pass123" -AsPlainText -Force
 $localcredential = New-Object System.Management.Automation.PSCredential ($localusername, $password)
@@ -172,11 +177,15 @@ $domainusername = "SH360\Administrator"
 $domaincredential = New-Object System.Management.Automation.PSCredential ($domainusername, $password)
 
 for ($i = 4; $i -le 7; $i++) {
-    Invoke-Command -ComputerName "192.168.0.$i" -ScriptBlock { 
-        slmgr.vbs /rearm
-        if ($Using:i -lt 7) {
+    if ($i -lt 7) {
+        Invoke-Command -ComputerName "192.168.0.$i" -ScriptBlock { 
+            slmgr.vbs /rearm
             net accounts /maxpwage:unlimited
             Add-Computer -DomainName "sh360.local" -Credential $Using:domaincredential -Restart -Force 
-        }
-    } -Credential $localcredential
+        } -Credential $localcredential
+    } else {
+        Invoke-Command -ComputerName "192.168.0.$i" -ScriptBlock { 
+            slmgr.vbs /rearm
+        } -Credential $domaincredential
+    }
 }
