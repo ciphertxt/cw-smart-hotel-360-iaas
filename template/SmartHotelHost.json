@@ -55,7 +55,8 @@
         "customScriptFolder": "./",
         "customScriptUriScriptFileName": "BootStrapSmartHotelHost.ps1",
         "customScriptUri": "https://raw.githubusercontent.com/ciphertxt/cw-smart-hotel-360-iaas/master/scripts/BootStrapSmartHotelHost.ps1",
-        "region": "[resourceGroup().location]"
+        "region": "[resourceGroup().location]",
+        "labName": "MCW-SQL-Server-Hybrid-Cloud"
     },
     "resources": [
         {
@@ -63,7 +64,9 @@
             "name": "[parameters('smarthotelhostVMname')]",
             "apiVersion": "2018-06-01",
             "location": "[resourceGroup().location]",
-            "tags": {},
+            "tags": {
+                "Lab": "[variables('labName')]"
+            },
             "properties": {
                 "hardwareProfile": {
                     "vmSize": "Standard_D8s_v3"
@@ -166,7 +169,9 @@
             "name": "[variables('smarthotelhostNICname')]",
             "apiVersion": "2018-08-01",
             "location": "[resourceGroup().location]",
-            "tags": {},
+            "tags": {
+                "Lab": "[variables('labName')]"
+            },
             "properties": {
                 "ipConfigurations": [
                     {
@@ -206,7 +211,9 @@
             "name": "[variables('publicIPAddressName')]",
             "apiVersion": "2018-08-01",
             "location": "[resourceGroup().location]",
-            "tags": {},
+            "tags": {
+                "Lab": "[variables('labName')]"
+            },
             "properties": {
                 "publicIPAddressVersion": "IPv4",
                 "publicIPAllocationMethod": "Dynamic",
@@ -224,7 +231,8 @@
             "name": "[variables('smarthotelVNETname')]",
             "location": "[resourceGroup().location]",
             "tags": {
-              "displayName": "VirtualNetwork"
+              "displayName": "VirtualNetwork",
+              "Lab": "[variables('labName')]"
             },
             "properties": {
               "addressSpace": {
@@ -247,7 +255,9 @@
             "name": "[variables('smarthotelhostNSGname')]",
             "apiVersion": "2018-08-01",
             "location": "[resourceGroup().location]",
-            "tags": {},
+            "tags": {
+                "Lab": "[variables('labName')]"
+            },
             "properties": {
                 "securityRules": [
                     {
@@ -293,6 +303,9 @@
             "type": "Microsoft.Network/trafficManagerProfiles",
             "name": "[variables('smarthotelhostTMName')]",
             "location": "global",
+            "tags": {
+                "Lab": "[variables('labName')]"
+            },
             "properties": {
               "profileStatus": "Enabled",
               "trafficRoutingMethod": "Priority",
