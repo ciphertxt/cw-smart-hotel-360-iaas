@@ -63,9 +63,10 @@
         "smarthotelhostNICname": "[concat(variables('smarthotelhostVMname'),'nic')]",
         "smarthotelad1VMname": "[concat(parameters('smartHotelName'),'ad1')]",
         "smarthotelad1NICname": "[concat(variables('smarthotelad1VMname'),'nic')]",
-        "smarthotelhostOSdisk": "[concat(variables('smarthotelhostVMname'),'_osdisk')]",
-        "smarthotelad1OSdisk": "[concat(variables('smarthotelad1VMname'),'_osdisk')]",
-        "smarthotelhostDATAdisk": "[concat(variables('smarthotelhostVMname'),'_datadisk')]",
+        "smarthotelhostOSdisk": "[concat(variables('smarthotelhostVMname'),'osdisk')]",
+        "smarthotelad1OSdisk": "[concat(variables('smarthotelad1VMname'),'osdisk')]",
+        "smarthotelhostDATAdisk": "[concat(variables('smarthotelhostVMname'),'datadisk')]",
+        "smarthotelad1DATAdisk": "[concat(variables('smarthotelad1VMname'),'datadisk')]",
         "publicIPAddressName": "[concat(variables('smarthotelhostVMname'), 'ip')]",
         "publicIPAddressNameAD": "[concat(variables('smarthotelad1VMname'), 'ip')]",
         "smarthotelVNETname": "[concat(parameters('smartHotelName'),'vnet')]",
@@ -114,7 +115,18 @@
                             "storageAccountType": "Premium_LRS"
                         },
                         "diskSizeGB": 127
-                    }
+                    },
+                    "dataDisks": [
+                        {
+                            "lun": 0,
+                            "name": "[variables('smarthotelad1DATAdisk')]",
+                            "createOption": "Attach",
+                            "caching": "None",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks/', variables('smarthotelad1DATAdisk'))]"
+                            }
+                        }
+                    ]
                 },
                 "osProfile": {
                     "computerName": "[variables('smarthotelad1VMname')]",
@@ -135,7 +147,8 @@
                 }
             },
             "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces', variables('smarthotelad1NICname'))]"
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('smarthotelad1NICname'))]",
+                "[resourceId('Microsoft.Compute/disks/', variables('smarthotelad1DATAdisk'))]"
             ],
             "resources": [
                 {
@@ -275,6 +288,21 @@
                     "createOption": "Empty"
                 },
                 "diskSizeGB": 1023
+            }
+        },
+        {
+            "type": "Microsoft.Compute/disks",
+            "name": "[variables('smarthotelad1DATAdisk')]",
+            "apiVersion": "2017-03-30",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Premium_LRS"
+            },
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "diskSizeGB": 20
             }
         },
         {
