@@ -162,7 +162,7 @@ for ($i = 4; $i -le 7; $i++) {
         slmgr.vbs /rearm
         if ($Using:i -lt 7) {
             net accounts /maxpwage:unlimited
-            Add-Computer –DomainName "sh360.local" -Credential $Using:domaincredential -Restart –Force 
+            Add-Computer -DomainName "sh360.local" -Credential $Using:domaincredential -Restart -Force 
         }
     } -Credential $localcredential
 }
