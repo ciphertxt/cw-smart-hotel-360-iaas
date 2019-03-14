@@ -137,9 +137,9 @@ New-VM -Name $vmNameWeb1 -MemoryStartupBytes 4GB -BootDevice VHD -VHDPath "$opsd
 New-VM -Name $vmNameWeb2 -MemoryStartupBytes 4GB -BootDevice VHD -VHDPath "$opsdir\$vmNameWeb2\$vmNameWeb2.vhdx" -Path "$opsdir\$vmNameWeb2" -Generation 2 -Switch $switchName 
 New-VM -Name $vmNameSQL1 -MemoryStartupBytes 4GB -BootDevice VHD -VHDPath "$opsdir\$vmNameSQL1\$vmNameSQL1.vhdx" -Path "$opsdir\$vmNameSQL1" -Generation 2 -Switch $switchName  
 
-Get-VMNetworkAdapter -VMName $vmNameWeb1 | Set-VMNetworkConfiguration -IPAddress "192.168.0.4" -Subnet "255.255.255.0" -DefaultGateway "192.168.0.1" -DNSServer "192.168.0.7"
-Get-VMNetworkAdapter -VMName $vmNameWeb2 | Set-VMNetworkConfiguration -IPAddress "192.168.0.5" -Subnet "255.255.255.0" -DefaultGateway "192.168.0.1" -DNSServer "192.168.0.7"
-Get-VMNetworkAdapter -VMName $vmNameSQL1 | Set-VMNetworkConfiguration -IPAddress "192.168.0.6" -Subnet "255.255.255.0" -DefaultGateway "192.168.0.1" -DNSServer "192.168.0.7"
+Get-VMNetworkAdapter -VMName $vmNameWeb1 | Set-VMNetworkConfiguration -IPAddress "192.168.0.4" -Subnet "255.255.255.0" -DefaultGateway "192.168.0.1" -DNSServer "10.0.0.4"
+Get-VMNetworkAdapter -VMName $vmNameWeb2 | Set-VMNetworkConfiguration -IPAddress "192.168.0.5" -Subnet "255.255.255.0" -DefaultGateway "192.168.0.1" -DNSServer "10.0.0.4"
+Get-VMNetworkAdapter -VMName $vmNameSQL1 | Set-VMNetworkConfiguration -IPAddress "192.168.0.6" -Subnet "255.255.255.0" -DefaultGateway "192.168.0.1" -DNSServer "10.0.0.4"
 
 # Start the SQL server
 Get-VM -Name $vmNameSQL1 | Start-VM
