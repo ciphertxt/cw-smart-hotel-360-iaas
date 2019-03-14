@@ -7,21 +7,28 @@
             "minLength": 1,
             "defaultValue": "demouser",
             "metadata": {
-              "description": "Username for the Virtual Machine."
+              "description": "Username for the Virtual Machines"
             }
         },
         "adminPassword": {
             "type": "securestring",
             "defaultValue": "demo@pass123",
             "metadata": {
-              "description": "Password for the Virtual Machine."
+              "description": "Password for the Virtual Machines"
             }
         },
         "smartHotelName": {
             "defaultValue": "smarthotel",
             "type": "string",
             "metadata": {
-                "description": "Name of the SmartHotel Host machine"
+                "description": "Prefix for SmartHotel assets"
+            }
+        },
+        "adDomainName": {
+            "type": "string",
+            "defaultValue": "sh360.local",
+            "metadata": {
+                "description": "Name of the AD domain"
             }
         },
         "studentFilesUrl": {
@@ -35,6 +42,20 @@
         "postBootScriptUrl": {
             "type": "string",
             "defaultValue": "https://raw.githubusercontent.com/ciphertxt/cw-smart-hotel-360-iaas/master/scripts/PostRebootConfigure.ps1"
+        },
+        "_artifactsLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The location of resources, such as templates and DSC modules, that the template depends on"
+            },
+            "defaultValue": "https://raw.githubusercontent.com/ciphertxt/cw-smart-hotel-360-iaas/master/"
+        },
+        "_artifactsLocationSasToken": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Auto-generated token to access _artifactsLocation"
+            },
+            "defaultValue": ""
         }
     },
     "variables": {
@@ -50,6 +71,7 @@
         "smarthotelVNETname": "[concat(parameters('smartHotelName'),'vnet')]",
         "addressPrefix": "10.0.0.0/16",
         "subnetPrefix": "10.0.0.0/24",
+        "smarthotelad1NICip": "10.0.0.4",
         "smarthotelSubnetname": "host",
         "smarthotelhostNSGname": "[concat(parameters('smartHotelName'),'nsg')]",
         "rdpRulename": "RDP",
@@ -114,6 +136,39 @@
             },
             "dependsOn": [
                 "[resourceId('Microsoft.Network/networkInterfaces', variables('smarthotelad1NICname'))]"
+            ],
+            "resources": [
+                {
+                    "type": "extensions",
+                    "name": "CreateADForest",
+                    "apiVersion": "2017-03-30",
+                    "location": "[resourceGroup().location]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Compute/virtualMachines', variables('smarthotelad1VMname'))]"
+                    ],
+                    "properties": {
+                        "publisher": "Microsoft.Powershell",
+                        "type": "DSC",
+                        "typeHandlerVersion": "2.19",
+                        "autoUpgradeMinorVersion": true,
+                        "settings": {
+                            "ModulesUrl": "[concat(parameters('_artifactsLocation'), '/dsc/CreateADPDC.zip', parameters('_artifactsLocationSasToken'))]",
+                            "ConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
+                            "Properties": {
+                                "DomainName": "[parameters('adDomainName')]",
+                                "AdminCreds": {
+                                    "UserName": "[parameters('adminUsername')]",
+                                    "Password": "PrivateSettingsRef:AdminPassword"
+                                }
+                            }
+                        },
+                        "protectedSettings": {
+                            "Items": {
+                                "AdminPassword": "[parameters('adminPassword')]"
+                            }
+                        }
+                    }
+                }
             ]
         },
         {
@@ -273,7 +328,8 @@
                     {
                         "name": "ipconfig1",
                         "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[variables('smarthotelad1NICip')]",
                             "publicIPAddress": {
                                 "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressNameAD'))]"
                             },
@@ -451,6 +507,40 @@
                 "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
                 "[resourceId('Microsoft.Network/networkInterfaces', variables('smarthotelhostNICname'))]"
             ]
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "UpdateVNetDNS",
+            "apiVersion": "2016-02-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', variables('smarthotelad1VMname'), 'CreateADForest')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('_artifactsLocation'), '/nestedtemplates/vnet-with-dns-server.json', parameters('_artifactsLocationSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "virtualNetworkName": {
+                        "value": "[variables('smarthotelVNETname')]"
+                    },
+                    "virtualNetworkAddressRange": {
+                        "value": "[variables('addressPrefix')]"
+                    },
+                    "subnetName": {
+                        "value": "[variables('smarthotelSubnetname')]"
+                    },
+                    "subnetRange": {
+                        "value": "[variables('subnetPrefix')]"
+                    },
+                    "DNSServerAddress": {
+                        "value": [
+                            "[variables('smarthotelad1NICip')]"
+                        ]
+                    }
+                }
+            }
         }
     ]
 }
