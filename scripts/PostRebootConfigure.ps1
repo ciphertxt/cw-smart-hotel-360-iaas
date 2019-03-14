@@ -144,9 +144,23 @@ Get-VMNetworkAdapter -VMName $vmNameWeb1 | Set-VMNetworkConfiguration -IPAddress
 Get-VMNetworkAdapter -VMName $vmNameWeb2 | Set-VMNetworkConfiguration -IPAddress "192.168.0.5" -Subnet "255.255.255.0" -DefaultGateway "192.168.0.1" -DNSServer "192.168.0.7"
 Get-VMNetworkAdapter -VMName $vmNameSQL1 | Set-VMNetworkConfiguration -IPAddress "192.168.0.6" -Subnet "255.255.255.0" -DefaultGateway "192.168.0.1" -DNSServer "192.168.0.7"
 
-# Start all the VMs
-Get-VM | ? {$_.State -eq 'Off'} | Start-VM
+# Start the domain controller
+Write-Output "Starting $vmNameAD1..."
+Get-VM -Name $vmNameAD1 | Start-VM
 
+# Give the VMs time to come up with a 30 sec wait
+Start-Sleep -s 30
+
+# Start the SQL server
+Write-Output "Starting $vmNameSQL1..."
+Get-VM -Name $vmNameSQL1 | Start-VM
+
+# Give the VMs time to come up with a 30 sec wait
+Start-Sleep -s 30
+
+# Start the remaining VMs
+Write-Output "Starting remaining VMs..."
+Get-VM | ? {$_.State -eq 'Off'} | Start-VM
 # Give the VMs time to come up with a 30 sec wait
 Start-Sleep -s 30
 
