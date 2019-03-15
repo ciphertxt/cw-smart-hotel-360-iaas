@@ -18,10 +18,10 @@
             }
         },
         "smartHotelName": {
-            "defaultValue": "smarthotelaz",
+            "defaultValue": "sh360az",
             "type": "string",
             "metadata": {
-                "description": "Prefix for SmartHotel assets"
+                "description": "Prefix for SmartHotel assets in the cloud"
             }
         },
         "adDomainName": {
@@ -40,7 +40,7 @@
         },
         "existingVNetName": {
             "type": "string",
-            "defaultValue": "smarthotelvnet",
+            "defaultValue": "sh360vnet",
             "metadata": {
                 "description": "Name of the remote VNet"
             }

@@ -18,10 +18,10 @@
             }
         },
         "smartHotelName": {
-            "defaultValue": "smarthotel",
+            "defaultValue": "sh360",
             "type": "string",
             "metadata": {
-                "description": "Prefix for SmartHotel assets"
+                "description": "Prefix for SmartHotel assets for a nested deployment"
             }
         },
         "adDomainName": {
