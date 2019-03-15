@@ -1,4 +1,4 @@
-﻿configuration CreateADPDC 
+﻿configuration CreateADSDC 
 { 
    param 
    ( 
@@ -109,7 +109,7 @@
             DatabasePath = "F:\NTDS"
             LogPath = "F:\NTDS"
             SysvolPath = "F:\SYSVOL"
-	        DependsOn = @("[xDisk]ADDataDisk", "[WindowsFeature]ADDSInstall", "[xWaitForADDomain]DScForestWait")
+	        DependsOn = "[xWaitForADDomain]DScForestWait"
         } 
 
         xPendingReboot Reboot1
