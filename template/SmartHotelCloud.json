@@ -45,6 +45,12 @@
                 "description": "Name of the remote VNet"
             }
         },
+        "DNSServerAddress": {
+            "type": "array",
+            "metadata": {
+              "description": "The DNS address(es) of the DNS Server(s) used by the VNET"
+            }
+        },
         "_artifactsLocation": {
             "type": "string",
             "metadata": {
@@ -474,6 +480,9 @@
                 "addressPrefixes": [
                   "[variables('addressPrefix')]"
                 ]
+              },
+              "dhcpOptions": {
+                "dnsServers": "[parameters('DNSServerAddress')]"
               },
               "subnets": [
                 {
