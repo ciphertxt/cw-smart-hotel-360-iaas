@@ -49,7 +49,10 @@
             "type": "array",
             "metadata": {
               "description": "The DNS address(es) of the DNS Server(s) used by the VNET"
-            }
+            },
+            "defaultValue": [
+                "10.0.0.4"
+            ]
         },
         "_artifactsLocation": {
             "type": "string",
