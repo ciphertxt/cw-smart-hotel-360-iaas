@@ -35,9 +35,9 @@
         "remoteVNet": "[resourceId(parameters('existingVNetResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('existingVNetName'))]",
         "currentVNet": "[resourceId(parameters('currentVNetResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('currentVNetName'))]",
         "peeringNameCloudShort": "peering-to-on-prem",
-        "peeringNameCloudFull": "[concat(parameters('existingVNetName'), '/', variables('peeringNameCloudShort'))]",
+        "peeringNameCloudFull": "[concat(parameters('currentVNetName'), '/', variables('peeringNameCloudShort'))]",
         "peeringNameOnPremShort": "peering-to-cloud",
-        "peeringNameOnPremFull": "[concat(parameters('currentVNetName'), '/', variables('peeringNameOnPremShort'))]",
+        "peeringNameOnPremFull": "[concat(parameters('existingVNetName'), '/', variables('peeringNameOnPremShort'))]",
         "region": "[resourceGroup().location]",
         "labName": "MCW-SQL-Server-Hybrid-Cloud"
     },
