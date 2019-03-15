@@ -580,7 +580,8 @@
         {
             "type": "Microsoft.Resources/deployments",
             "name": "UpdateVNetPeeringToCloud",
-            "apiVersion": "2016-02-01",
+            "apiVersion": "2017-05-10",
+            "resourceGroup": "[parameters('existingVNetResourceGroup')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'UpdateVNetPeeringToGround')]",
                 "[resourceId('Microsoft.Network/virtualNetworks/', variables('smarthotelVNETname'))]"
