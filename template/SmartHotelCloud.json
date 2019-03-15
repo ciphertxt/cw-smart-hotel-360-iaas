@@ -387,7 +387,8 @@
             },
             "dependsOn": [
                 "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
-                "[resourceId('Microsoft.Network/virtualNetworks/', variables('smarthotelVNETname'))]"
+                "[resourceId('Microsoft.Network/virtualNetworks/', variables('smarthotelVNETname'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('smarthotelad2NICname'))]"
             ]
         },
         {
