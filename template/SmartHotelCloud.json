@@ -33,7 +33,7 @@
         },
         "existingVNetResourceGroup": {
             "type": "string",
-            "defaultValue": "SH360",
+            "defaultValue": "sh360rg",
             "metadata": {
                 "description": "Name of the resource group that contains the remote VNet"
             }
