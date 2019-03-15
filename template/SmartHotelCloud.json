@@ -154,7 +154,7 @@
                 "[resourceId('Microsoft.Network/networkInterfaces', variables('smarthotelad2NICname'))]",
                 "[resourceId('Microsoft.Compute/disks/', variables('smarthotelad2DATAdisk'))]",
                 "[resourceId('Microsoft.Resources/deployments', 'UpdateVNetPeeringToGround')]",
-                "[resourceId('Microsoft.Resources/deployments', 'UpdateVNetPeeringToCloud')]"
+                "[resourceId(parameters('existingVNetResourceGroup'),'Microsoft.Resources/deployments','UpdateVNetPeeringToCloud')]"
             ],
             "resources": [
                 {
