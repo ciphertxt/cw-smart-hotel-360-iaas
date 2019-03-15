@@ -151,7 +151,7 @@ for ($i=30;$i -gt 1;$i--) {
 # Start the remaining VMs
 Get-VM | ? {$_.State -eq 'Off'} | Start-VM
 
-for ($i=30;$i -gt 1;$i--) {
+for ($i=60;$i -gt 1;$i--) {
     Write-Progress -Activity "Starting remaining VMs..." -SecondsRemaining $i
     Start-Sleep -s 1
 }
@@ -166,9 +166,11 @@ $domaincredential = New-Object System.Management.Automation.PSCredential ($domai
 $vmStopIP = 6
 
 for ($i = 4; $i -le $vmStopIP; $i++) {
+    Write-Output "Configuring VM at 192.168.0.$i..."
     Invoke-Command -ComputerName "192.168.0.$i" -ScriptBlock { 
         slmgr.vbs /rearm
         net accounts /maxpwage:unlimited
         Add-Computer -DomainName "sh360.local" -Credential $Using:domaincredential -Restart -Force 
     } -Credential $localcredential
+    Write-Output "Configuration complete"
 }
