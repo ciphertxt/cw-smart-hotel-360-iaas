@@ -109,7 +109,7 @@
             DatabasePath = "F:\NTDS"
             LogPath = "F:\NTDS"
             SysvolPath = "F:\SYSVOL"
-	        DependsOn = "[xWaitForADDomain]DScForestWait"
+	        DependsOn = @("[xDisk]ADDataDisk", "[WindowsFeature]ADDSInstall", "[xWaitForADDomain]DScForestWait")
         } 
 
         xPendingReboot Reboot1
