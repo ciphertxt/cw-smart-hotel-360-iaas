@@ -1,0 +1,82 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "existingVNetResourceGroup": {
+            "type": "string",
+            "defaultValue": "SH360",
+            "metadata": {
+                "description": "Name of the resource group that contains the remote VNet"
+            }
+        },
+        "existingVNetName": {
+            "type": "string",
+            "defaultValue": "smarthotelvnet",
+            "metadata": {
+                "description": "Name of the remote VNet"
+            }
+        },
+        "currentVNetResourceGroup": {
+            "type": "string",
+            "defaultValue": "SH360AZ",
+            "metadata": {
+                "description": "Name of the resource group that contains the current VNet"
+            }
+        },
+        "currentVNetName": {
+            "type": "string",
+            "defaultValue": "smarthotelazvnet",
+            "metadata": {
+                "description": "Name of the current VNet"
+            }
+        }
+    },
+    "variables": {
+        "remoteVNet": "[resourceId(parameters('existingVNetResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('existingVNetName'))]",
+        "currentVNet": "[resourceId(parameters('currentVNetResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('currentVNetName'))]",
+        "peeringNameCloudShort": "peering-to-on-prem",
+        "peeringNameCloudFull": "[concat(parameters('existingVNetName'), '/', variables('peeringNameCloudShort'))]",
+        "peeringNameOnPremShort": "peering-to-cloud",
+        "peeringNameOnPremFull": "[concat(parameters('currentVNetName'), '/', variables('peeringNameOnPremShort'))]",
+        "region": "[resourceGroup().location]",
+        "labName": "MCW-SQL-Server-Hybrid-Cloud"
+    },
+    "resources": [
+        {
+            "apiVersion": "2016-06-01",
+            "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+            "name": "[variables('peeringNameCloudFull')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+              "allowVirtualNetworkAccess": true,
+              "allowForwardedTraffic": false,
+              "allowGatewayTransit": false,
+              "useRemoteGateways": false,
+              "remoteVirtualNetwork": {
+                "id": "[variables('remoteVNet')]"
+              }
+            },
+            "dependsOn": [
+                "[variables('remoteVNet')]"
+            ]
+        },
+        {
+            "apiVersion": "2016-06-01",
+            "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+            "name": "[variables('peeringNameOnPremFull')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+              "allowVirtualNetworkAccess": true,
+              "allowForwardedTraffic": false,
+              "allowGatewayTransit": false,
+              "useRemoteGateways": false,
+              "remoteVirtualNetwork": {
+                "id": "[variables('currentVNet')]"
+              }
+            },
+            "dependsOn": [
+                "[variables('currentVNet')]"
+            ]
+        }
+    ]
+}

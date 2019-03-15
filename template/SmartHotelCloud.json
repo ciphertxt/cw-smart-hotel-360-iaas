@@ -61,17 +61,17 @@
         }
     },
     "variables": {
-        "smarthotelsqlVMname": "[concat(parameters('smartHotelName'),'sql2')]",
-        "smarthotelsqlNICname": "[concat(variables('smarthotelsqlVMname'),'nic')]",
-        "smarthotelad2VMname": "[concat(parameters('smartHotelName'),'ad2')]",
-        "smarthotelad2NICname": "[concat(variables('smarthotelad2VMname'),'nic')]",
-        "smarthotelsqlOSdisk": "[concat(variables('smarthotelsqlVMname'),'osdisk')]",
-        "smarthotelad2OSdisk": "[concat(variables('smarthotelad2VMname'),'osdisk')]",
-        "smarthotelsqlDATAdisk": "[concat(variables('smarthotelsqlVMname'),'datadisk')]",
-        "smarthotelad2DATAdisk": "[concat(variables('smarthotelad2VMname'),'datadisk')]",
+        "smarthotelsqlVMname": "[concat(parameters('smartHotelName'), 'sql2')]",
+        "smarthotelsqlNICname": "[concat(variables('smarthotelsqlVMname'), 'nic')]",
+        "smarthotelad2VMname": "[concat(parameters('smartHotelName'), 'ad2')]",
+        "smarthotelad2NICname": "[concat(variables('smarthotelad2VMname'), 'nic')]",
+        "smarthotelsqlOSdisk": "[concat(variables('smarthotelsqlVMname'), 'osdisk')]",
+        "smarthotelad2OSdisk": "[concat(variables('smarthotelad2VMname'), 'osdisk')]",
+        "smarthotelsqlDATAdisk": "[concat(variables('smarthotelsqlVMname'), 'datadisk')]",
+        "smarthotelad2DATAdisk": "[concat(variables('smarthotelad2VMname'), 'datadisk')]",
         "publicIPAddressName": "[concat(variables('smarthotelsqlVMname'), 'ip')]",
         "publicIPAddressNameAD": "[concat(variables('smarthotelad2VMname'), 'ip')]",
-        "smarthotelVNETname": "[concat(parameters('smartHotelName'),'vnet')]",
+        "smarthotelVNETname": "[concat(parameters('smartHotelName'), 'vnet')]",
         "addressPrefix": "10.1.0.0/16",
         "subnetPrefix": "10.1.0.0/24",
         "smarthotelad2NICip": "10.1.0.4",
@@ -79,8 +79,10 @@
         "smarthotelNSGname": "[concat(parameters('smartHotelName'),'nsg')]",
         "rdpRulename": "RDP",
         "remoteVNet": "[resourceId(parameters('existingVNetResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('existingVNetName'))]",
-        "peeringNameCloud": "[concat(variables('smarthotelVNETname'), '/peering-to-on-prem')]",
-        "peeringNameOnPrem": "[concat(parameters('existingVNetName'), '/peering-to-cloud')]",
+        "peeringNameCloudShort": "peering-to-on-prem",
+        "peeringNameCloudFull": "[concat(variables('smarthotelVNETname'), '/', variables('peeringNameCloudShort'))]",
+        "peeringNameOnPremShort": "peering-to-cloud",
+        "peeringNameOnPremFull": "[concat(parameters('existingVNetName'), '/', variables('peeringNameOnPremShort'))]",
         "region": "[resourceGroup().location]",
         "labName": "MCW-SQL-Server-Hybrid-Cloud"
     },
@@ -156,8 +158,7 @@
                     "location": "[resourceGroup().location]",
                     "dependsOn": [
                         "[resourceId('Microsoft.Compute/virtualMachines', variables('smarthotelad2VMname'))]",
-                        "[resourceId('Microsoft.Network/virtualNetworks/virtualNetworkPeerings/', variables('peeringNameCloud'))]",
-                        "[resourceId('Microsoft.Network/virtualNetworks/virtualNetworkPeerings/', variables('peeringNameOnPrem'))]"
+                        "[resourceId('Microsoft.Resources/deployments','UpdateVNetPeering')]"
                     ],
                     "properties": {
                         "publisher": "Microsoft.Powershell",
@@ -489,43 +490,6 @@
             }
         },
         {
-            "apiVersion": "2016-06-01",
-            "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
-            "name": "[variables('peeringNameCloud')]",
-            "location": "[resourceGroup().location]",
-            "properties": {
-              "allowVirtualNetworkAccess": true,
-              "allowForwardedTraffic": false,
-              "allowGatewayTransit": false,
-              "useRemoteGateways": false,
-              "remoteVirtualNetwork": {
-                "id": "[variables('remoteVNet')]"
-              }
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks/', variables('smarthotelVNETname'))]"
-            ]
-        },
-        {
-            "apiVersion": "2016-06-01",
-            "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
-            "name": "[variables('peeringNameOnPrem')]",
-            "location": "[resourceGroup().location]",
-            "properties": {
-              "allowVirtualNetworkAccess": true,
-              "allowForwardedTraffic": false,
-              "allowGatewayTransit": false,
-              "useRemoteGateways": false,
-              "remoteVirtualNetwork": {
-                "id": "[resourceId('Microsoft.Network/virtualNetworks', variables('smarthotelVNETname'))]"
-              }
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks/', variables('smarthotelVNETname'))]",
-                "[resourceId('Microsoft.Network/virtualNetworks/virtualNetworkPeerings/', variables('peeringNameCloud'))]"
-            ]
-        },
-        {
             "type": "Microsoft.Network/networkSecurityGroups",
             "name": "[variables('smarthotelNSGname')]",
             "apiVersion": "2018-08-01",
@@ -587,6 +551,35 @@
                         "value": [
                             "[variables('smarthotelad2NICip')]"
                         ]
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "UpdateVNetPeering",
+            "apiVersion": "2016-02-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/', variables('smarthotelVNETname'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('_artifactsLocation'), '/nestedtemplates/vnet-peering.json', parameters('_artifactsLocationSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "existingVNetResourceGroup": {
+                        "value": "[parameters('existingVNetResourceGroup')]"
+                    },
+                    "existingVNetName": {
+                        "value": "[parameters('existingVNetName')]"
+                    },
+                    "currentVNetResourceGroup": {
+                        "value": "[resourceGroup().name]"
+                    },
+                    "currentVNetName": {
+                        "value": "[variables('smarthotelVNETname')]"
                     }
                 }
             }
