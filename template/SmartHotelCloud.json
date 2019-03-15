@@ -153,7 +153,8 @@
                     "location": "[resourceGroup().location]",
                     "dependsOn": [
                         "[resourceId('Microsoft.Compute/virtualMachines', variables('smarthotelad2VMname'))]",
-                        "[resourceId('Microsoft.Resources/deployments','UpdateVNetPeering')]"
+                        "[resourceId('Microsoft.Resources/deployments','UpdateVNetPeeringToGround')]",
+                        "[resourceId('Microsoft.Resources/deployments','UpdateVNetPeeringToCloud')]"
                     ],
                     "properties": {
                         "publisher": "Microsoft.Powershell",
@@ -552,7 +553,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "name": "UpdateVNetPeering",
+            "name": "UpdateVNetPeeringToGround",
             "apiVersion": "2016-02-01",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/virtualNetworks/', variables('smarthotelVNETname'))]"
@@ -564,17 +565,41 @@
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
-                    "existingVNetResourceGroup": {
+                    "existingRemoteVirtualNetworkResourceGroupName": {
                         "value": "[parameters('existingVNetResourceGroup')]"
                     },
-                    "existingVNetName": {
+                    "existingRemoteVirtualNetworkName": {
                         "value": "[parameters('existingVNetName')]"
                     },
-                    "currentVNetResourceGroup": {
+                    "existingLocalVirtualNetworkName": {
+                        "value": "[variables('smarthotelVNETname')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "UpdateVNetPeeringToCloud",
+            "apiVersion": "2016-02-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'UpdateVNetPeeringToGround')]",
+                "[resourceId('Microsoft.Network/virtualNetworks/', variables('smarthotelVNETname'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('_artifactsLocation'), '/nestedtemplates/vnet-peering.json', parameters('_artifactsLocationSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "existingRemoteVirtualNetworkResourceGroupName": {
                         "value": "[resourceGroup().name]"
                     },
-                    "currentVNetName": {
+                    "existingRemoteVirtualNetworkName": {
                         "value": "[variables('smarthotelVNETname')]"
+                    },
+                    "existingLocalVirtualNetworkName": {
+                        "value": "[parameters('existingVNetName')]"
                     }
                 }
             }
