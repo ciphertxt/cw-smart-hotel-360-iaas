@@ -86,7 +86,7 @@
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[variables('smarthotelad2VMname')]",
             "apiVersion": "2018-06-01",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('region')]",
             "tags": {
                 "Lab": "[variables('labName')]"
             },
@@ -150,11 +150,11 @@
                     "type": "extensions",
                     "name": "CreateADForest",
                     "apiVersion": "2017-03-30",
-                    "location": "[resourceGroup().location]",
+                    "location": "[variables('region')]",
                     "dependsOn": [
                         "[resourceId('Microsoft.Compute/virtualMachines', variables('smarthotelad2VMname'))]",
                         "[resourceId('Microsoft.Resources/deployments','UpdateVNetPeeringToGround')]",
-                        "[resourceId('Microsoft.Resources/deployments','UpdateVNetPeeringToCloud')]"
+                        "[resourceId(parameters('existingVNetResourceGroup'),'Microsoft.Resources/deployments','UpdateVNetPeeringToCloud')]"
                     ],
                     "properties": {
                         "publisher": "Microsoft.Powershell",
@@ -185,7 +185,7 @@
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[variables('smarthotelsqlVMname')]",
             "apiVersion": "2018-06-01",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('region')]",
             "tags": {
                 "Lab": "[variables('labName')]"
             },
@@ -250,7 +250,7 @@
                     "apiVersion": "2015-06-15",
                     "type": "extensions",
                     "name": "JoinDomain",
-                    "location": "[resourceGroup().location]",
+                    "location": "[variables('region')]",
                     "dependsOn": [
                       "[concat('Microsoft.Compute/virtualMachines/', variables('smarthotelsqlVMname'))]",
                       "[resourceId('Microsoft.Compute/virtualMachines/extensions', variables('smarthotelad2VMname'), 'CreateADForest')]"
@@ -278,7 +278,7 @@
             "name": "[variables('smarthotelsqlVMname')]",
             "type": "Microsoft.SqlVirtualMachine/SqlVirtualMachines",
             "apiVersion": "2017-03-01-preview",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('region')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines', variables('smarthotelsqlVMname'))]",
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', variables('smarthotelsqlVMname'), 'JoinDomain')]"
@@ -317,7 +317,7 @@
             "type": "Microsoft.Compute/disks",
             "name": "[variables('smarthotelsqlDATAdisk')]",
             "apiVersion": "2017-03-30",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('region')]",
             "sku": {
                 "name": "Premium_LRS"
             },
@@ -332,7 +332,7 @@
             "type": "Microsoft.Compute/disks",
             "name": "[variables('smarthotelad2DATAdisk')]",
             "apiVersion": "2017-03-30",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('region')]",
             "sku": {
                 "name": "Premium_LRS"
             },
@@ -347,7 +347,7 @@
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[variables('smarthotelsqlNICname')]",
             "apiVersion": "2018-08-01",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('region')]",
             "tags": {
                 "Lab": "[variables('labName')]"
             },
@@ -385,7 +385,7 @@
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[variables('smarthotelad2NICname')]",
             "apiVersion": "2018-08-01",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('region')]",
             "tags": {
                 "Lab": "[variables('labName')]"
             },
@@ -428,7 +428,7 @@
             },
             "name": "[variables('publicIPAddressNameAD')]",
             "apiVersion": "2018-08-01",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('region')]",
             "tags": {
                 "Lab": "[variables('labName')]"
             },
@@ -448,7 +448,7 @@
             },
             "name": "[variables('publicIPAddressName')]",
             "apiVersion": "2018-08-01",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('region')]",
             "tags": {
                 "Lab": "[variables('labName')]"
             },
@@ -464,7 +464,7 @@
             "apiVersion": "2016-03-30",
             "type": "Microsoft.Network/virtualNetworks",
             "name": "[variables('smarthotelVNETname')]",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('region')]",
             "tags": {
               "displayName": "VirtualNetwork",
               "Lab": "[variables('labName')]"
@@ -489,7 +489,7 @@
             "type": "Microsoft.Network/networkSecurityGroups",
             "name": "[variables('smarthotelNSGname')]",
             "apiVersion": "2018-08-01",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('region')]",
             "tags": {
                 "Lab": "[variables('labName')]"
             },

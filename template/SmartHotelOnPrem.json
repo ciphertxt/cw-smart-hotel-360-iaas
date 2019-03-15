@@ -91,7 +91,7 @@
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[variables('smarthotelad1VMname')]",
             "apiVersion": "2018-06-01",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('region')]",
             "tags": {
                 "Lab": "[variables('labName')]"
             },
@@ -155,7 +155,7 @@
                     "type": "extensions",
                     "name": "CreateADForest",
                     "apiVersion": "2017-03-30",
-                    "location": "[resourceGroup().location]",
+                    "location": "[variables('region')]",
                     "dependsOn": [
                         "[resourceId('Microsoft.Compute/virtualMachines', variables('smarthotelad1VMname'))]"
                     ],
@@ -188,7 +188,7 @@
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[variables('smarthotelhostVMname')]",
             "apiVersion": "2018-06-01",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('region')]",
             "tags": {
                 "Lab": "[variables('labName')]"
             },
@@ -252,7 +252,7 @@
                 {
                   "name": "BootStrapSmartHotel",
                   "type": "extensions",
-                  "location": "[resourceGroup().location]",
+                  "location": "[variables('region')]",
                   "apiVersion": "2016-03-30",
                   "dependsOn": [
                     "[resourceId('Microsoft.Compute/virtualMachines', variables('smarthotelhostVMname'))]",
@@ -280,7 +280,7 @@
             "type": "Microsoft.Compute/disks",
             "name": "[variables('smarthotelhostDATAdisk')]",
             "apiVersion": "2017-03-30",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('region')]",
             "sku": {
                 "name": "Premium_LRS"
             },
@@ -295,7 +295,7 @@
             "type": "Microsoft.Compute/disks",
             "name": "[variables('smarthotelad1DATAdisk')]",
             "apiVersion": "2017-03-30",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('region')]",
             "sku": {
                 "name": "Premium_LRS"
             },
@@ -310,7 +310,7 @@
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[variables('smarthotelhostNICname')]",
             "apiVersion": "2018-08-01",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('region')]",
             "tags": {
                 "Lab": "[variables('labName')]"
             },
@@ -348,7 +348,7 @@
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[variables('smarthotelad1NICname')]",
             "apiVersion": "2018-08-01",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('region')]",
             "tags": {
                 "Lab": "[variables('labName')]"
             },
@@ -391,7 +391,7 @@
             },
             "name": "[variables('publicIPAddressNameAD')]",
             "apiVersion": "2018-08-01",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('region')]",
             "tags": {
                 "Lab": "[variables('labName')]"
             },
@@ -411,7 +411,7 @@
             },
             "name": "[variables('publicIPAddressName')]",
             "apiVersion": "2018-08-01",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('region')]",
             "tags": {
                 "Lab": "[variables('labName')]"
             },
@@ -430,7 +430,7 @@
             "apiVersion": "2016-03-30",
             "type": "Microsoft.Network/virtualNetworks",
             "name": "[variables('smarthotelVNETname')]",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('region')]",
             "tags": {
               "displayName": "VirtualNetwork",
               "Lab": "[variables('labName')]"
@@ -455,7 +455,7 @@
             "type": "Microsoft.Network/networkSecurityGroups",
             "name": "[variables('smarthotelhostNSGname')]",
             "apiVersion": "2018-08-01",
-            "location": "[resourceGroup().location]",
+            "location": "[variables('region')]",
             "tags": {
                 "Lab": "[variables('labName')]"
             },
