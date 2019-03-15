@@ -151,7 +151,7 @@ for ($i=30;$i -gt 1;$i--) {
 # Start the remaining VMs
 Get-VM | ? {$_.State -eq 'Off'} | Start-VM
 
-for ($i=60;$i -gt 1;$i--) {
+for ($i=120;$i -gt 1;$i--) {
     Write-Progress -Activity "Starting remaining VMs..." -SecondsRemaining $i
     Start-Sleep -s 1
 }
