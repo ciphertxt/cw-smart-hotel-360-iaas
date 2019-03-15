@@ -55,7 +55,7 @@
             Address        = '127.0.0.1' 
             InterfaceAlias = $InterfaceAlias
             AddressFamily  = 'IPv4'
-	        DependsOn = "[WindowsFeature]DNS"
+	        DependsOn = "[xADDomainController]SecondDS"
         }
 
         xWaitforDisk Disk2
