@@ -21,6 +21,8 @@
     {
         LocalConfigurationManager 
         {
+            ActionAfterReboot = 'ContinueConfiguration'
+            ConfigurationMode = 'ApplyOnly' 
             RebootNodeIfNeeded = $true
         }
 
@@ -90,12 +92,13 @@
             DependsOn = "[WindowsFeature]ADDSInstall"
         }
 
-        xComputer JoinDomain
-        {
-            Name = ($DCPrefix + $i.ToString().PadLeft(2, '0'))
-            DomainName = $DomainName
-            Credential = $DomainCreds
-            DependsOn = @("[xDisk]ADDataDisk", "[WindowsFeature]ADDSInstall")
+        xWaitForADDomain DscForestWait 
+        { 
+            DomainName = $DomainName 
+            DomainUserCredential= $DomainCreds
+            RetryCount = $RetryCount
+            RetryIntervalSec = $RetryIntervalSec
+            DependsOn = "[WindowsFeature]ADDSInstall"
         }
          
         xADDomainController SecondDS 
@@ -106,8 +109,14 @@
             DatabasePath = "F:\NTDS"
             LogPath = "F:\NTDS"
             SysvolPath = "F:\SYSVOL"
-	        DependsOn = @("[xDisk]ADDataDisk", "[WindowsFeature]ADDSInstall")
+	        DependsOn = @("[xDisk]ADDataDisk", "[WindowsFeature]ADDSInstall", "[xWaitForADDomain]DScForestWait")
         } 
+
+        xPendingReboot Reboot1
+        { 
+            Name = "RebootServer"
+            DependsOn = "[xADDomainController]SecondDS"
+        }
 
    }
 } 
