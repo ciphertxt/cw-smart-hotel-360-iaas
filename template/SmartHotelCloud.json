@@ -78,11 +78,6 @@
         "smarthotelSubnetname": "host",
         "smarthotelNSGname": "[concat(parameters('smartHotelName'),'nsg')]",
         "rdpRulename": "RDP",
-        "remoteVNet": "[resourceId(parameters('existingVNetResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('existingVNetName'))]",
-        "peeringNameCloudShort": "peering-to-on-prem",
-        "peeringNameCloudFull": "[concat(variables('smarthotelVNETname'), '/', variables('peeringNameCloudShort'))]",
-        "peeringNameOnPremShort": "peering-to-cloud",
-        "peeringNameOnPremFull": "[concat(parameters('existingVNetName'), '/', variables('peeringNameOnPremShort'))]",
         "region": "[resourceGroup().location]",
         "labName": "MCW-SQL-Server-Hybrid-Cloud"
     },

@@ -56,9 +56,7 @@
                 "id": "[variables('remoteVNet')]"
               }
             },
-            "dependsOn": [
-                "[variables('remoteVNet')]"
-            ]
+            "dependsOn": []
         },
         {
             "apiVersion": "2016-06-01",
@@ -74,9 +72,7 @@
                 "id": "[variables('currentVNet')]"
               }
             },
-            "dependsOn": [
-                "[variables('currentVNet')]"
-            ]
+            "dependsOn": []
         }
     ]
 }
